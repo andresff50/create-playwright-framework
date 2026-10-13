@@ -4,7 +4,7 @@ Generador interactivo de frameworks de automatización con **Playwright**, en **
 en **español o inglés** (preguntas, código, comentarios, nombres de tests y documentación).
 Hace preguntas en la terminal y crea un esqueleto listo para trabajar, escalable de un proyecto pequeño a uno empresarial.
 
-- Un solo archivo, **sin dependencias**: solo necesitas **Node.js 18+** (también para generar proyectos Python).
+- Para usarlo basta un solo archivo, **sin dependencias**: solo necesitas **Node.js 18+** (también para generar proyectos Python).
 - Funciona en Windows, macOS y Linux.
 
 ## Uso
@@ -73,17 +73,35 @@ Proyectos generados y verificados:
 ## Idiomas
 
 El español es el idioma fuente de las plantillas. En inglés, cada texto de la terminal y cada archivo generado pasa por
-`tr()` con la tabla `I18N_EN` embebida en el script (reemplazo de frases, de la más larga a la más corta).
+`translate()` con la tabla de `src/i18n/en.ts` (reemplazo de frases, de la más larga a la más corta).
 
-- La tabla se edita en `i18n/en_pairs.py` y se vuelve a embeber con `python3 i18n/inject.py`.
-- Si añades o cambias un texto en español en una plantilla, añade su traducción en `en_pairs.py`.
-- Verificación usada: generar todas las variantes en inglés y buscar caracteres y palabras en español;
-  el proyecto en español es idéntico al de la versión anterior.
+- Si añades o cambias un texto en español en una plantilla, añade su traducción en `src/i18n/en.ts`.
+- Un test genera todas las variantes en inglés y busca caracteres y palabras en español.
 
-## Mantenimiento
+## Desarrollo
 
+`create-pw-framework.mjs` es un archivo **generado**: el código fuente está en `src/` (TypeScript, por módulos) y se
+empaqueta con esbuild. Para usar el generador no hace falta nada de esto; para modificarlo, Node.js 22.18+:
+
+```bash
+npm install
+npm run build     # regenera create-pw-framework.mjs a partir de src/
+npm run check     # tipos, ESLint, Prettier y tests
+```
+
+| Carpeta | Contenido |
+|---|---|
+| `src/cli.ts`, `src/cli/` | Punto de entrada, argumentos, preguntas y mensajes de la terminal |
+| `src/answers/` | Tipos de las respuestas, catálogos de opciones, valores por tamaño y normalización |
+| `src/templates/` | Una función por archivo generado (`ts/`, `py/`, `ci/`, `claude/`, `docs/`) |
+| `src/project/` | Ensamblado del proyecto, escritura en disco e instalación |
+| `src/i18n/` | Tabla de traducción es→en |
+| `tests/` | Tests; `tests/golden/` fija la salida esperada de cada variante |
+
+- Los tests comparan cada archivo generado con una referencia (`tests/golden/`): un refactor no puede cambiar la salida
+  sin que se note. Si el cambio es intencionado: `npm run test:update-golden`.
+- El bundle se confirma en el repo junto con el cambio; un test falla si no está al día con `src/`.
 - Para modificarlo con Claude Code: abre esta carpeta completa; `CLAUDE.md` explica la arquitectura y las reglas.
-- Antes de entregar cambios: `bash scripts/check.sh` (genera todas las variantes ES/EN y valida la salida).
-
-- `PW_VERSION` (al inicio del script) fija `@playwright/test` y la imagen Docker de CI: actualízalos juntos.
-- Para añadir una opción nueva: agrégala al catálogo (`*_OPTIONS`), pregúntala en `collectAnswers` y úsala en `buildProject`.
+- `PW_VERSION` (`src/version.ts`) fija `@playwright/test` y la imagen Docker de CI: actualízalos juntos.
+- Para añadir una opción nueva: tipo en `src/answers/types.ts`, catálogo y valores por tamaño en `catalog.ts`, pregunta en
+  `collect.ts` y uso en las plantillas; el compilador señala lo que falte.
