@@ -2538,9 +2538,7 @@ function readme(a, fileList) {
     "- Un retry que pasa es un test *flaky*: se mide y se corrige, no se ignora.",
     "- Secretos solo por variables de entorno / secrets del CI. `.env` y `.auth/` nunca se versionan.",
     "",
-    // Comportamiento heredado: sin CI esta condición vale 0 y el README generado lleva una línea "0".
-    // Se conserva para no cambiar la salida; la corrección es `a.ci.length > 0 && [`.
-    a.ci.length === 0 ? "0" : [
+    a.ci.length > 0 && [
       "## CI/CD",
       "",
       `Pipelines generados: ${ciLabels}. Configura en tu herramienta de CI las variables \`BASE_URL\`, \`TEST_ENV\`${a.api ? ", `API_URL`, `API_TOKEN` (secreto)" : ""}${a.auth ? ", `TEST_USER_EMAIL`, `TEST_USER_PASSWORD` (secreto)" : ""}${a.db !== "none" ? ", `DB_URL` (secreto)" : ""}.`,
