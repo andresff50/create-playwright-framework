@@ -11,6 +11,7 @@
   Reports                html
   API / DB / Data        no / none / yes
   Auth / Extras          no / —
+  BDD                    no
   Docker / CI            none / github
   Lint / pre-commit      yes / no
   Claude Code            no

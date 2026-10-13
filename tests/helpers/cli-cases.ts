@@ -50,6 +50,7 @@ export const CLI_CASES: CliCase[] = [
       'n', // datos
       's', // auth
       '1', // a11y
+      's', // BDD
       '1,2', // reportes
       '3', // compose
       '1,3', // github + gitlab
@@ -81,6 +82,7 @@ export const CLI_CASES: CliCase[] = [
       'y',
       'n',
       '0',
+      'y',
       '0',
       '',
       '0',
@@ -97,7 +99,7 @@ export const CLI_CASES: CliCase[] = [
   {
     id: 'interactive-cancel',
     args: ['--lang', 'es'],
-    stdin: ['x', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'n'],
+    stdin: ['x', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'n'],
   },
 ];
 

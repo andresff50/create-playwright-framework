@@ -47,6 +47,7 @@
   ◯ 1) Accessibility with axe-core
   ◯ 2) Visual regression (toHaveScreenshot)
   › 0
+? Include BDD with Gherkin (Cucumber)? (y/N): y
 
 ── 4. Reports & metrics ─────────────────────────────────
 ? Reports to integrate (comma-separated numbers, Enter = checked values, 0 = none)
@@ -83,13 +84,14 @@
   Reports                list
   API / DB / Data        yes / none / yes
   Auth / Extras          no / —
+  BDD                    Cucumber
   Docker / CI            none / —
   Lint / pre-commit      yes / yes
   Claude Code            no
 
 ? Generate the project with this configuration? (Y/n): y
 
-  ✔ 19 files generated in <CWD>/out
+  ✔ 24 files generated in <CWD>/out
 ? Install dependencies and browsers now? (Y/n): n
 
 ── Next steps ───────────────────────────────────────

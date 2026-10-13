@@ -11,12 +11,14 @@ export function claudeMd(a: Answers): string {
       ? [
           '- Ejecutar un test: `npx playwright test <ruta> --project=' + a.browsers[0] + ' --reporter=list`',
           '- Smoke: `npm run test:smoke`',
+          a.bdd && '- BDD (Cucumber): `npm run test:bdd`',
           a.lint && '- Lint y tipos: `npm run lint && npm run typecheck`',
           '- Traza de un fallo: `npx playwright show-trace <trace.zip>`',
         ]
       : [
           '- Ejecutar un test: `pytest <ruta> -x`',
           '- Smoke: `pytest -m smoke`',
+          a.bdd && '- BDD (Behave): `python -m behave`',
           a.lint && '- Lint y tipos: `ruff check . && ruff format --check . && mypy .`',
           '- Traza de un fallo: `playwright show-trace <trace.zip>`',
         ],
@@ -29,6 +31,8 @@ export function claudeMd(a: Answers): string {
     '- Page objects: locators en el constructor, métodos de intención, SIN aserciones de negocio.',
     '- Page objects y clientes se inyectan por fixtures; nunca se instancian dentro del test.',
     '- Locators: getByRole > getByLabel > getByTestId (`data-qa`) > texto. Prohibido XPath y CSS posicional.',
+    a.bdd &&
+      '- BDD: features en `features/`, pasos en `features/steps`; los pasos NO llevan selectores ni lógica: delegan en page objects.',
     '',
     '## Reglas de calidad',
     '- Prohibido `waitForTimeout`/`time.sleep`, `force: true`, `test.only`.',

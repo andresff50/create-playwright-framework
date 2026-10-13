@@ -11,12 +11,13 @@
   Reports                html, junit, allure, metrics
   API / DB / Data        yes / postgres / yes
   Auth / Extras          yes / a11y, visual
+  BDD                    Cucumber
   Docker / CI            compose / github, jenkins, gitlab, azure (4 shards)
   Lint / pre-commit      yes / yes
   Claude Code            yes
 
 
-  ✔ 50 files generated in <CWD>/out
+  ✔ 55 files generated in <CWD>/out
   ✔ Git repository initialized
 
 ── Next steps ───────────────────────────────────────

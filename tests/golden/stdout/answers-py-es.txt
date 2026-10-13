@@ -11,12 +11,13 @@
   Reportes               html, junit, allure, metrics
   API / BD / Datos       sí / postgres / sí
   Auth / Extras          sí / a11y
+  BDD                    Behave
   Docker / CI            compose / github, jenkins, gitlab, azure (3 shards)
   Lint / pre-commit      sí / sí
   Claude Code            sí
 
 
-  ✔ 51 archivos generados en <CWD>/out
+  ✔ 55 archivos generados en <CWD>/out
   ✔ Repositorio git inicializado
 
 ── Siguientes pasos ───────────────────────────────────────

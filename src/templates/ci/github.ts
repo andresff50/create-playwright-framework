@@ -14,6 +14,51 @@ export const envSecretsGh = (a: Answers): string =>
     a.db !== 'none' && '      DB_URL: ${{ secrets.DB_URL }}',
   );
 
+const bddJobTs = (a: Answers) =>
+  a.bdd && [
+    '',
+    '  bdd:',
+    a.lint && '    needs: [quality]',
+    '    runs-on: ubuntu-latest',
+    '    timeout-minutes: 30',
+    '    container:',
+    `      image: mcr.microsoft.com/playwright:v${PW_VERSION}-noble`,
+    '      options: --ipc=host',
+    '    env:',
+    '      CI: true',
+    '      HOME: /root',
+    envSecretsGh(a),
+    '    steps:',
+    '      - uses: actions/checkout@v4',
+    '      - run: npm ci',
+    '      - run: npm run test:bdd',
+    '      - uses: actions/upload-artifact@v4',
+    '        if: ${{ !cancelled() }}',
+    '        with: { name: bdd-results, path: reports/, retention-days: 14 }',
+  ];
+
+const bddJobPy = (a: Answers) =>
+  a.bdd && [
+    '',
+    '  bdd:',
+    a.lint && '    needs: [quality]',
+    '    runs-on: ubuntu-latest',
+    '    timeout-minutes: 30',
+    '    env:',
+    '      CI: true',
+    envSecretsGh(a),
+    '    steps:',
+    '      - uses: actions/checkout@v4',
+    '      - uses: actions/setup-python@v5',
+    "        with: { python-version: '3.12', cache: pip }",
+    '      - run: pip install -r requirements.txt',
+    `      - run: python -m playwright install --with-deps ${installBrowsers(a)[0]}`,
+    '      - run: python -m behave',
+    '      - uses: actions/upload-artifact@v4',
+    '        if: ${{ !cancelled() }}',
+    '        with: { name: bdd-results, path: reports/, retention-days: 14 }',
+  ];
+
 export function githubWorkflow(a: Answers): string {
   const n = a.shards;
   const shardMatrix =
@@ -102,6 +147,7 @@ export function githubWorkflow(a: Answers): string {
         '      - uses: actions/upload-artifact@v4',
         '        with: { name: html-report, path: playwright-report, retention-days: 14 }',
       ],
+      bddJobTs(a),
       '',
     );
   }
@@ -151,6 +197,7 @@ export function githubWorkflow(a: Answers): string {
     '            test-results/',
     has(a, 'reporters', 'allure') && '            allure-results/',
     '          retention-days: 14',
+    bddJobPy(a),
     '',
   );
 }

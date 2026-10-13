@@ -42,6 +42,7 @@
   ◉ 1) Accesibilidad con axe-core
   ◯ 2) Regresión visual (toHaveScreenshot)
   › 
+? ¿Incluir BDD con Gherkin (Cucumber)? (s/N): 
 
 ── 4. Reportes y métricas ─────────────────────────────────
 ? Reportes a integrar (números separados por coma, Enter = valores marcados, 0 = ninguno)
@@ -79,6 +80,7 @@
   Reportes               html, junit
   API / BD / Datos       sí / none / sí
   Auth / Extras          sí / a11y
+  BDD                    no
   Docker / CI            dockerfile / github (2 shards)
   Lint / pre-commit      sí / sí
   Claude Code            sí

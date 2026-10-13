@@ -19,4 +19,6 @@ export const installBrowsers = (a: Answers): string[] => [
     a.browsers.map((b) => (b === 'mobile-chrome' ? 'chromium' : b === 'mobile-safari' ? 'webkit' : b)),
   ),
 ];
+/** Herramienta BDD de cada lenguaje: Python no tiene Cucumber oficial, se usa Behave. */
+export const bddTool = (a: Answers): string => (a.lang === 'ts' ? 'Cucumber' : 'Behave');
 export const hasBackend = (a: Answers): boolean => a.api || a.db !== 'none';

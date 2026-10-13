@@ -1,6 +1,6 @@
 import type { Answers } from '../answers/types.ts';
 import { DB_URLS } from '../answers/catalog.ts';
-import { lines, has } from './helpers.ts';
+import { bddTool, has, installBrowsers, lines } from './helpers.ts';
 
 export function gitignore(): string {
   return lines(
@@ -53,6 +53,12 @@ export function envExample(a: Answers): string {
       '',
       '# Base de datos de QA (usuario de SOLO LECTURA para verificaciones)',
       `DB_URL=${DB_URLS[a.db]}`,
+    ],
+    a.bdd && [
+      '',
+      `# BDD (${bddTool(a)}): navegador y modo visible (HEADED=1)`,
+      `BROWSER=${installBrowsers(a)[0]}`,
+      'HEADED=',
     ],
     '',
   );

@@ -31,6 +31,7 @@ export interface SizeDefaults {
   data: boolean;
   auth: boolean;
   extras: Extra[];
+  bdd: boolean;
   docker: Docker;
   ci: Ci[];
   shards: number;

@@ -39,7 +39,7 @@ node create-pw-framework.mjs --answers ejemplos/ts-grande-postgres.json --out ./
 | Idioma | Español o English (primera pregunta) |
 | Proyecto | Nombre, lenguaje (TypeScript / Python), tamaño (pequeño, mediano, grande) |
 | Aplicación | URL base, ambientes (dev, qa, staging…), navegadores y dispositivos móviles |
-| Capas | Pruebas de API, base de datos (PostgreSQL, MySQL, SQL Server, MongoDB), datos sintéticos, autenticación reutilizable, accesibilidad, regresión visual |
+| Capas | Pruebas de API, base de datos (PostgreSQL, MySQL, SQL Server, MongoDB), datos sintéticos, autenticación reutilizable, accesibilidad, regresión visual, BDD con Gherkin (Cucumber en TypeScript, Behave en Python) |
 | Reportes | HTML, JUnit, Allure, reporter de métricas propio (flaky rate, duración, tests lentos) |
 | Infraestructura | Docker / docker-compose (con BD efímera), CI: GitHub Actions, Jenkins, GitLab CI, Azure DevOps, número de shards |
 | Calidad e IA | ESLint + Prettier o Ruff + mypy, pre-commit (husky / pre-commit), integración con Claude Code |
@@ -52,6 +52,9 @@ El **tamaño** solo propone valores por defecto; puedes cambiar cualquier respue
 - Configuración centralizada por ambiente (`.env.<ambiente>`) con guard que impide ejecutar contra producción.
 - Tests de ejemplo que pasan sin configuración (los de API y BD se saltan hasta definir `API_URL` / `DB_URL`).
 - Pipelines de CI con sharding, artefactos y publicación de resultados JUnit.
+- Opcional: BDD con Gherkin. En TypeScript se usa **Cucumber** (`@cucumber/cucumber`); en Python, que no tiene Cucumber
+  oficial, **Behave**. Incluye un `.feature` con dos escenarios (uno es un esquema del escenario con ejemplos), los pasos
+  sobre los mismos page objects, hooks de navegador y un job/etapa de BDD en cada pipeline de CI.
 - Opcional: `CLAUDE.md`, `.claude/settings.json` con bloqueo de `.env`, hooks (secretos, PII, lint, puerta final),
   skills (`synthetic-data`, `page-object`, `flaky-triage`), subagentes (planner, generator, healer, reviewer) y `.mcp.json` con Playwright MCP.
 - `README.md` del proyecto con la configuración elegida, comandos, estructura y próximos pasos.
@@ -69,6 +72,8 @@ Proyectos generados y verificados:
 | TS pequeño | `tsc`, ESLint, Prettier |
 | Python grande (mismas opciones) | Ruff, `ruff format`, `mypy --strict`, pytest con xdist, HTML/JUnit/Allure/métricas, hooks de Claude |
 | Python con MySQL, SQL Server y MongoDB; Python pequeño | Ruff + mypy (+ pytest en el pequeño) |
+| TS grande con BDD (Cucumber), en español y en inglés | `tsc`, ESLint, Prettier, `npm run test:bdd` en verde (4 escenarios), reportes HTML y JUnit |
+| Python grande con BDD (Behave), en español y en inglés | Ruff, `ruff format`, `mypy --strict`, `python -m behave` en verde (4 escenarios), JUnit |
 
 ## Idiomas
 

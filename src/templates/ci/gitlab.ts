@@ -65,6 +65,21 @@ export function gitlabCi(a: Answers): string {
     has(a, 'reporters', 'allure') && '      - allure-results/',
     '    reports:',
     '      junit: reports/junit.xml',
+    a.bdd && [
+      '',
+      'bdd:',
+      '  stage: test',
+      '  script:',
+      '    - *install',
+      ts ? '    - npm run test:bdd' : '    - python -m behave',
+      '  artifacts:',
+      '    when: always',
+      '    expire_in: 2 weeks',
+      '    paths:',
+      '      - reports/',
+      '    reports:',
+      ts ? '      junit: reports/cucumber-junit.xml' : '      junit: reports/behave/*.xml',
+    ],
     '',
   );
 }

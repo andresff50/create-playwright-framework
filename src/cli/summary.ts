@@ -2,7 +2,7 @@ import path from 'node:path';
 import process from 'node:process';
 import type { Answers } from '../answers/types.ts';
 import { tr } from '../i18n/index.ts';
-import { installBrowsers } from '../templates/helpers.ts';
+import { bddTool, installBrowsers } from '../templates/helpers.ts';
 import { c, log } from './console.ts';
 
 export function printSummary(a: Answers): void {
@@ -15,6 +15,7 @@ export function printSummary(a: Answers): void {
   row('Reportes', a.reporters.join(', ') || 'list');
   row('API / BD / Datos', `${yn(a.api)} / ${a.db} / ${yn(a.data)}`);
   row('Auth / Extras', `${yn(a.auth)} / ${a.extras.join(', ') || '—'}`);
+  row('BDD', a.bdd ? bddTool(a) : 'no');
   row('Docker / CI', `${a.docker} / ${a.ci.join(', ') || '—'}${a.shards > 1 ? ` (${a.shards} shards)` : ''}`);
   row('Lint / pre-commit', `${yn(a.lint)} / ${yn(a.precommit)}`);
   row('Claude Code', yn(a.claude));

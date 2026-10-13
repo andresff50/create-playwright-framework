@@ -1,5 +1,5 @@
 import type { Answers } from '../../answers/types.ts';
-import { lines, has, uiBrowsers, hasBackend } from '../helpers.ts';
+import { lines, has, installBrowsers, uiBrowsers, hasBackend } from '../helpers.ts';
 import { PW_VERSION } from '../../version.ts';
 
 export function tsPackageJson(a: Answers): string {
@@ -21,6 +21,7 @@ export function tsPackageJson(a: Answers): string {
     scripts['allure:generate'] = 'allure generate allure-results -o allure-report --clean';
     scripts['allure:open'] = 'allure open allure-report';
   }
+  if (a.bdd) scripts['test:bdd'] = 'cucumber-js';
   if (a.lint) {
     Object.assign(scripts, {
       lint: 'eslint .',
@@ -53,6 +54,8 @@ export function tsPackageJson(a: Answers): string {
   if (has(a, 'extras', 'a11y'))
     Object.assign(dev, { '@axe-core/playwright': '^4.10.1', 'playwright-core': PW_VERSION });
   if (has(a, 'extras', 'visual')) dev['cross-env'] = '^7.0.3';
+  // tsx carga los pasos en TypeScript sin compilar
+  if (a.bdd) Object.assign(dev, { '@cucumber/cucumber': '^12.9.0', tsx: '^4.20.0' });
   if (a.precommit) Object.assign(dev, { husky: '^9.1.7', 'lint-staged': '^15.2.10' });
   if (a.db === 'postgres') Object.assign(dev, { pg: '^8.13.1', '@types/pg': '^8.11.10' });
   if (a.db === 'mysql') dev.mysql2 = '^3.11.4';
@@ -72,7 +75,7 @@ export function tsPackageJson(a: Answers): string {
   return JSON.stringify(pkg, null, 2) + '\n';
 }
 
-export function tsConfigJson(): string {
+export function tsConfigJson(a: Answers): string {
   return (
     JSON.stringify(
       {
@@ -89,7 +92,13 @@ export function tsConfigJson(): string {
           forceConsistentCasingInFileNames: true,
           types: ['node'],
         },
-        include: ['*.ts', 'src/**/*.ts', 'tests/**/*.ts', 'reporters/**/*.ts'],
+        include: [
+          '*.ts',
+          'src/**/*.ts',
+          'tests/**/*.ts',
+          'reporters/**/*.ts',
+          ...(a.bdd ? ['features/**/*.ts'] : []),
+        ],
       },
       null,
       2,
@@ -192,6 +201,7 @@ export function tsEnv(a: Answers): string {
     "  USER_EMAIL: get('TEST_USER_EMAIL'),",
     "  USER_PASSWORD: get('TEST_USER_PASSWORD'),",
     "  DB_URL: get('DB_URL'),",
+    a.bdd && [`  BROWSER: get('BROWSER', '${installBrowsers(a)[0]}'),`, "  HEADED: get('HEADED') === '1',"],
     '} as const;',
     '',
     '// Guard: evita ejecutar contra producción por error',

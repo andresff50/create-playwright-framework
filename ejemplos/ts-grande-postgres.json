@@ -28,6 +28,7 @@
     "a11y",
     "visual"
   ],
+  "bdd": true,
   "docker": "compose",
   "ci": [
     "github",

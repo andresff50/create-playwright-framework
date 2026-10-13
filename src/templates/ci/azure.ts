@@ -1,5 +1,5 @@
 import type { Answers } from '../../answers/types.ts';
-import { lines, installBrowsers } from '../helpers.ts';
+import { bddTool, lines, installBrowsers } from '../helpers.ts';
 
 export function azurePipeline(a: Answers): string {
   const ts = a.lang === 'ts';
@@ -67,11 +67,17 @@ export function azurePipeline(a: Answers): string {
         : '      - script: pytest -n auto --reruns 2',
     '        displayName: Ejecutar pruebas',
     secretEnv && ['        env:', secretEnv],
+    a.bdd && [
+      ts ? '      - script: npm run test:bdd' : '      - script: python -m behave',
+      `        displayName: Ejecutar BDD (${bddTool(a)})`,
+      n > 1 && "        condition: and(succeeded(), eq(variables['System.JobPositionInPhase'], 1))",
+      secretEnv && ['        env:', secretEnv],
+    ],
     '      - task: PublishTestResults@2',
     '        condition: succeededOrFailed()',
     '        inputs:',
     '          testResultsFormat: JUnit',
-    '          testResultsFiles: reports/junit.xml',
+    `          testResultsFiles: ${a.bdd ? 'reports/**/*.xml' : 'reports/junit.xml'}`,
     '          mergeTestResults: true',
     "          testRunTitle: 'E2E $(System.JobPositionInPhase)'",
     '      - task: PublishPipelineArtifact@1',

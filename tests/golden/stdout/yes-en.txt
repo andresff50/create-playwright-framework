@@ -11,6 +11,7 @@
   Reports                html, junit
   API / DB / Data        yes / none / yes
   Auth / Extras          yes / a11y
+  BDD                    no
   Docker / CI            dockerfile / github (2 shards)
   Lint / pre-commit      yes / yes
   Claude Code            yes

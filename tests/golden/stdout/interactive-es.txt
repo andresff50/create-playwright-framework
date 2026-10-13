@@ -50,6 +50,7 @@
 ? Pruebas adicionales (números separados por coma, Enter = valores marcados, 0 = ninguno)
   ◉ 1) Accesibilidad con axe-core
   › 1
+? ¿Incluir BDD con Gherkin (Behave)? (s/N): s
 
 ── 4. Reportes y métricas ─────────────────────────────────
 ? Reportes a integrar (números separados por coma, Enter = valores marcados, 0 = ninguno)
@@ -91,13 +92,14 @@
   Reportes               html, junit
   API / BD / Datos       sí / postgres / no
   Auth / Extras          sí / a11y
+  BDD                    Behave
   Docker / CI            compose / github, gitlab (2 shards)
   Lint / pre-commit      sí / no
   Claude Code            sí
 
 ? ¿Generar el proyecto con esta configuración? (S/n): s
 
-  ✔ 44 archivos generados en <CWD>/out
+  ✔ 48 archivos generados en <CWD>/out
 ? ¿Instalar dependencias y navegadores ahora? (S/n): n
 
 ── Siguientes pasos ───────────────────────────────────────

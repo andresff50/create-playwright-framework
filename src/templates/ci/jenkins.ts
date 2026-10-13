@@ -57,10 +57,17 @@ export function jenkinsfile(a: Answers): string {
     `        ${testCmd}`,
     '      }',
     '    }',
+    a.bdd && [
+      "    stage('BDD') {",
+      '      steps {',
+      ts ? "        sh 'npm run test:bdd'" : "        sh '. .venv/bin/activate && python -m behave'",
+      '      }',
+      '    }',
+    ],
     '  }',
     '  post {',
     '    always {',
-    "      junit allowEmptyResults: true, testResults: 'reports/junit.xml'",
+    `      junit allowEmptyResults: true, testResults: '${a.bdd ? 'reports/**/*.xml' : 'reports/junit.xml'}'`,
     ts
       ? "      archiveArtifacts artifacts: 'playwright-report/**, test-results/**, reports/**', allowEmptyArchive: true"
       : "      archiveArtifacts artifacts: 'reports/**, test-results/**', allowEmptyArchive: true",

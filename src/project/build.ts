@@ -11,16 +11,19 @@ import { claudeHooksNode } from '../templates/claude/hooks-node.ts';
 import { claudeHooksPy } from '../templates/claude/hooks-py.ts';
 import { claudeSettings, mcpJson } from '../templates/claude/settings.ts';
 import { claudeSkills } from '../templates/claude/skills.ts';
+import { homeFeature } from '../templates/bdd.ts';
 import { composeFile, dockerignore, editorconfig, envExample, gitignore } from '../templates/common.ts';
 import { architectureDoc } from '../templates/docs/architecture.ts';
 import { readme } from '../templates/docs/readme.ts';
 import { has, lines } from '../templates/helpers.ts';
 import { pyApiClient, pyDb, pyFactories } from '../templates/py/api-data-db.ts';
+import { pyBehaveEnvironment, pyBehaveIni, pyHomeSteps } from '../templates/py/bdd.ts';
 import { pyEnv, pyPrecommit, pyProject, pyRequirements } from '../templates/py/config.ts';
 import { pyConftest, pyHeader, pyHomePage, pyLoginPage } from '../templates/py/conftest-pages.ts';
 import { pyMetricsPlugin } from '../templates/py/metrics-plugin.ts';
 import { pyTestA11y, pyTestApi, pyTestDb, pyTestHome } from '../templates/py/tests.ts';
 import { tsApiClient, tsDb, tsUserFactory } from '../templates/ts/api-data-db.ts';
+import { tsBddHooks, tsBddWorld, tsCucumberConfig, tsHomeSteps } from '../templates/ts/bdd.ts';
 import {
   tsConfigJson,
   tsEnv,
@@ -47,7 +50,7 @@ const json = (value: unknown): string => JSON.stringify(value, null, 2) + '\n';
 
 function tsFiles(f: ProjectFiles, a: Answers): void {
   f.set('package.json', tsPackageJson(a));
-  f.set('tsconfig.json', tsConfigJson());
+  f.set('tsconfig.json', tsConfigJson(a));
   f.set('playwright.config.ts', tsPlaywrightConfig(a));
   f.set('src/config/env.ts', tsEnv(a));
   f.set('src/fixtures/index.ts', tsFixtures(a));
@@ -70,6 +73,13 @@ function tsFiles(f: ProjectFiles, a: Answers): void {
   if (has(a, 'extras', 'a11y')) f.set('tests/e2e/a11y.spec.ts', tsA11ySpec());
   if (has(a, 'extras', 'visual')) f.set('tests/visual/home.visual.spec.ts', tsVisualSpec());
   if (has(a, 'reporters', 'metrics')) f.set('reporters/metrics-reporter.ts', tsMetricsReporter());
+  if (a.bdd) {
+    f.set('cucumber.json', tsCucumberConfig(a));
+    f.set('features/home.feature', homeFeature());
+    f.set('features/support/world.ts', tsBddWorld());
+    f.set('features/support/hooks.ts', tsBddHooks());
+    f.set('features/steps/home.steps.ts', tsHomeSteps());
+  }
   if (a.lint) {
     f.set('eslint.config.mjs', tsEslintConfig());
     f.set('.prettierrc.json', json({ singleQuote: true, printWidth: 110, trailingComma: 'all' }));
@@ -123,6 +133,12 @@ function pyFiles(f: ProjectFiles, a: Answers): void {
   if (has(a, 'reporters', 'metrics')) {
     f.set('plugins/__init__.py', '');
     f.set('plugins/metrics.py', pyMetricsPlugin());
+  }
+  if (a.bdd) {
+    f.set('behave.ini', pyBehaveIni(a));
+    f.set('features/home.feature', homeFeature());
+    f.set('features/environment.py', pyBehaveEnvironment());
+    f.set('features/steps/home_steps.py', pyHomeSteps());
   }
   if (a.precommit) f.set('.pre-commit-config.yaml', pyPrecommit());
 }

@@ -1,7 +1,7 @@
 import type { Answers } from '../../answers/types.ts';
 import { SIZES, DB_OPTIONS, DOCKER_OPTIONS, CI_OPTIONS } from '../../answers/catalog.ts';
 import { buildTree } from './tree.ts';
-import { lines, has, installBrowsers } from '../helpers.ts';
+import { bddTool, lines, has, installBrowsers } from '../helpers.ts';
 import { PW_VERSION, GENERATOR_VERSION } from '../../version.ts';
 
 export function readme(a: Answers, fileList: string[]): string {
@@ -29,6 +29,7 @@ export function readme(a: Answers, fileList: string[]): string {
     `| Datos sintéticos | ${yes(a.data)} |`,
     `| Autenticación reutilizable | ${yes(a.auth)} |`,
     `| Extras | ${a.extras.join(', ') || 'Ninguno'} |`,
+    `| BDD (Gherkin) | ${a.bdd ? bddTool(a) : 'No'} |`,
     `| Contenedores | ${DOCKER_OPTIONS.find((d) => d.value === a.docker)?.label} |`,
     `| CI/CD | ${ciLabels}${a.shards > 1 ? ` (${a.shards} shards)` : ''} |`,
     `| Linters / pre-commit | ${yes(a.lint)} / ${yes(a.precommit)} |`,
@@ -78,6 +79,11 @@ export function readme(a: Answers, fileList: string[]): string {
           has(a, 'extras', 'visual') &&
             '| Visual (crear/actualizar baseline) | `npm run test:visual:update` |',
           has(a, 'extras', 'visual') && '| Visual (comparar) | `npm run test:visual` |',
+          a.bdd && [
+            '| BDD (Cucumber) | `npm run test:bdd` |',
+            '| BDD solo smoke | `npm run test:bdd -- --tags @smoke` |',
+            '| BDD con navegador visible | `HEADED=1 npm run test:bdd` |',
+          ],
           a.lint && '| Lint / formato / tipos | `npm run lint` · `npm run format` · `npm run typecheck` |',
         ]
       : [
@@ -90,6 +96,11 @@ export function readme(a: Answers, fileList: string[]): string {
           '| Emular móvil | `pytest --device "iPhone 15"` |',
           has(a, 'reporters', 'html') && '| Reporte HTML | `reports/report.html` |',
           has(a, 'reporters', 'allure') && '| Reporte Allure | `allure serve allure-results` |',
+          a.bdd && [
+            '| BDD (Behave) | `python -m behave` |',
+            '| BDD solo smoke | `python -m behave --tags=@smoke` |',
+            '| BDD con navegador visible | `HEADED=1 python -m behave` |',
+          ],
           a.lint && '| Lint / formato / tipos | `ruff check .` · `ruff format .` · `mypy .` |',
         ],
     has(a, 'reporters', 'metrics') && '| Métricas de la corrida | `reports/metrics.json` |',
@@ -114,6 +125,9 @@ export function readme(a: Answers, fileList: string[]): string {
     a.api && '- **API client**: setup rápido de datos y verificaciones sin UI.',
     a.data && '- **Data factories**: datos 100 % sintéticos y únicos por test (paralelismo seguro).',
     a.db !== 'none' && '- **DB**: consultas parametrizadas, usuario de solo lectura y guard anti-producción.',
+    a.bdd &&
+      `- **BDD (${bddTool(a)})**: los \`.feature\` describen el comportamiento en Gherkin; los pasos delegan en los mismos page objects.`,
+    a.bdd && !ts && '- Python no tiene Cucumber oficial: los `.feature` se ejecutan con **Behave**.',
     '- **Config**: única lectura de variables de entorno; guard que impide ejecutar contra producción.',
     '',
     '## Estructura',

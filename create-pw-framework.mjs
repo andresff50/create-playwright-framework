@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // ARCHIVO GENERADO por `npm run build` a partir de src/. No lo edites a mano.
+// Generado: 2026-10-13T01:24:00Z
 
 // src/cli.ts
 import fs4 from "node:fs";
@@ -952,7 +953,92 @@ var PAIRS = [
   ["| Regresión completa con sharding |", "| Full regression with sharding |"],
   ["| Cross-browser + visual + accesibilidad |", "| Cross-browser + visual + accessibility |"],
   ["# Ajusta los equipos a tu organización", "# Adjust the teams to your organization"],
-  ["@mi-org/", "@my-org/"]
+  ["@mi-org/", "@my-org/"],
+  // ─────────────── BDD (Cucumber / Behave) ───────────────
+  ["¿Incluir BDD con Gherkin (Cucumber)?", "Include BDD with Gherkin (Cucumber)?"],
+  ["¿Incluir BDD con Gherkin (Behave)?", "Include BDD with Gherkin (Behave)?"],
+  ["# language: es", "# language: en"],
+  ["Característica: Página de inicio", "Feature: Home page"],
+  [
+    "  Como visitante quiero abrir la página de inicio para empezar a usar la aplicación.",
+    "  As a visitor I want to open the home page so I can start using the application."
+  ],
+  ["  Escenario: La página de inicio carga", "  Scenario: The home page loads"],
+  ["    Cuando abro la página de inicio", "    When I open the home page"],
+  ["    Entonces la página tiene un título", "    Then the page has a title"],
+  ["    Y veo el encabezado principal", "    And I see the main heading"],
+  [
+    "  Esquema del escenario: La página de inicio se adapta a <dispositivo>",
+    "  Scenario Outline: The home page adapts to <device>"
+  ],
+  ["    Dado una pantalla de <ancho> x <alto>", "    Given a <width> x <height> screen"],
+  ["    Entonces veo el encabezado principal", "    Then I see the main heading"],
+  ["    Ejemplos:", "    Examples:"],
+  ["      | dispositivo | ancho | alto |", "      | device  | width | height |"],
+  ["      | escritorio  | 1440  | 900  |", "      | desktop | 1440  | 900    |"],
+  ["      | tableta     | 768   | 1024 |", "      | tablet  | 768   | 1024   |"],
+  ["      | celular     | 390   | 844  |", "      | mobile  | 390   | 844    |"],
+  ["una pantalla de {int} x {int}", "a {int} x {int} screen"],
+  ["una pantalla de {width:d} x {height:d}", "a {width:d} x {height:d} screen"],
+  ["abro la página de inicio", "I open the home page"],
+  ["la página tiene un título", "the page has a title"],
+  ["veo el encabezado principal", "I see the main heading"],
+  [
+    "/** Estado de un escenario. Los hooks crean un contexto, una página y los Page Objects por escenario. */",
+    "/** Scenario state. The hooks create a context, a page and the Page Objects for each scenario. */"
+  ],
+  ["// Un navegador por ejecución", "// One browser per run"],
+  [
+    "Un contexto nuevo por escenario: escenarios independientes entre sí",
+    "A new context per scenario: scenarios stay independent"
+  ],
+  ["BROWSER no soportado", "Unsupported BROWSER"],
+  ["El navegador no se inició", "The browser did not start"],
+  [
+    "# Si before_all falló puede no haber nada que cerrar",
+    "# If before_all failed there may be nothing to close"
+  ],
+  [
+    "// Los pasos describen el comportamiento y delegan en los Page Objects: sin selectores aquí.",
+    "// Steps describe behaviour and delegate to the Page Objects: no selectors here."
+  ],
+  [
+    "// tsx carga los pasos en TypeScript sin compilar",
+    "// tsx loads the TypeScript steps without compiling"
+  ],
+  [
+    '"""Hooks de Behave: un navegador por ejecución y un contexto nuevo por escenario."""',
+    '"""Behave hooks: one browser per run and a new context per scenario."""'
+  ],
+  [
+    '"""Pasos de la página de inicio: describen el comportamiento y delegan en los Page Objects."""',
+    '"""Home page steps: they describe behaviour and delegate to the Page Objects."""'
+  ],
+  [
+    "# Behave no publica tipos: sus decoradores no están tipados",
+    "# Behave ships no types: its decorators are untyped"
+  ],
+  ['locale="es-CO"', 'locale="en-US"'],
+  [
+    "# Python no tiene Cucumber oficial: los .feature (Gherkin) se ejecutan con Behave → python -m behave",
+    "# Python has no official Cucumber: .feature files (Gherkin) run with Behave → python -m behave"
+  ],
+  ["navegador y modo visible (HEADED=1)", "browser and headed mode (HEADED=1)"],
+  ["displayName: Ejecutar BDD", "displayName: Run BDD"],
+  ["| BDD solo smoke |", "| BDD smoke only |"],
+  ["| BDD con navegador visible |", "| BDD headed browser |"],
+  [
+    "los `.feature` describen el comportamiento en Gherkin; los pasos delegan en los mismos page objects.",
+    "`.feature` files describe behaviour in Gherkin; steps delegate to the same page objects."
+  ],
+  [
+    "- Python no tiene Cucumber oficial: los `.feature` se ejecutan con **Behave**.",
+    "- Python has no official Cucumber: `.feature` files run with **Behave**."
+  ],
+  [
+    "- BDD: features en `features/`, pasos en `features/steps`; los pasos NO llevan selectores ni lógica: delegan en page objects.",
+    "- BDD: features in `features/`, steps in `features/steps`; steps carry NO selectors or logic: they delegate to page objects."
+  ]
 ];
 
 // src/i18n/index.ts
@@ -1102,6 +1188,7 @@ var DEFAULTS = {
     data: true,
     auth: false,
     extras: [],
+    bdd: false,
     docker: "none",
     ci: ["github"],
     shards: 1,
@@ -1118,6 +1205,7 @@ var DEFAULTS = {
     data: true,
     auth: true,
     extras: ["a11y"],
+    bdd: false,
     docker: "dockerfile",
     ci: ["github"],
     shards: 2,
@@ -1134,6 +1222,7 @@ var DEFAULTS = {
     data: true,
     auth: true,
     extras: ["a11y", "visual"],
+    bdd: false,
     docker: "compose",
     ci: ["github"],
     shards: 4,
@@ -1260,6 +1349,10 @@ async function askAnswers() {
     extraOptions(lang),
     d.extras.filter((e) => lang === "ts" || e !== "visual")
   );
+  a.bdd = await askConfirm(
+    lang === "ts" ? "¿Incluir BDD con Gherkin (Cucumber)?" : "¿Incluir BDD con Gherkin (Behave)?",
+    d.bdd
+  );
   section("4. Reportes y métricas ─────────────────────────────────");
   a.reporters = await askMulti("Reportes a integrar", reporterOptions(lang), d.reporters);
   section("5. Infraestructura y CI/CD ─────────────────────────────");
@@ -1320,6 +1413,7 @@ var installBrowsers = (a) => [
     a.browsers.map((b) => b === "mobile-chrome" ? "chromium" : b === "mobile-safari" ? "webkit" : b)
   )
 ];
+var bddTool = (a) => a.lang === "ts" ? "Cucumber" : "Behave";
 var hasBackend = (a) => a.api || a.db !== "none";
 
 // src/cli/summary.ts
@@ -1333,6 +1427,7 @@ function printSummary(a) {
   row("Reportes", a.reporters.join(", ") || "list");
   row("API / BD / Datos", `${yn(a.api)} / ${a.db} / ${yn(a.data)}`);
   row("Auth / Extras", `${yn(a.auth)} / ${a.extras.join(", ") || "—"}`);
+  row("BDD", a.bdd ? bddTool(a) : "no");
   row("Docker / CI", `${a.docker} / ${a.ci.join(", ") || "—"}${a.shards > 1 ? ` (${a.shards} shards)` : ""}`);
   row("Lint / pre-commit", `${yn(a.lint)} / ${yn(a.precommit)}`);
   row("Claude Code", yn(a.claude));
@@ -1425,11 +1520,17 @@ function azurePipeline(a) {
     ts ? n > 1 ? "      - script: npx playwright test --shard=$(System.JobPositionInPhase)/$(System.TotalJobsInPhase)" : "      - script: npx playwright test" : n > 1 ? "      - script: pytest -n auto --reruns 2 --splits $(System.TotalJobsInPhase) --group $(System.JobPositionInPhase)" : "      - script: pytest -n auto --reruns 2",
     "        displayName: Ejecutar pruebas",
     secretEnv && ["        env:", secretEnv],
+    a.bdd && [
+      ts ? "      - script: npm run test:bdd" : "      - script: python -m behave",
+      `        displayName: Ejecutar BDD (${bddTool(a)})`,
+      n > 1 && "        condition: and(succeeded(), eq(variables['System.JobPositionInPhase'], 1))",
+      secretEnv && ["        env:", secretEnv]
+    ],
     "      - task: PublishTestResults@2",
     "        condition: succeededOrFailed()",
     "        inputs:",
     "          testResultsFormat: JUnit",
-    "          testResultsFiles: reports/junit.xml",
+    `          testResultsFiles: ${a.bdd ? "reports/**/*.xml" : "reports/junit.xml"}`,
     "          mergeTestResults: true",
     "          testRunTitle: 'E2E $(System.JobPositionInPhase)'",
     "      - task: PublishPipelineArtifact@1",
@@ -1484,6 +1585,47 @@ var envSecretsGh = (a) => lines(
   ],
   a.db !== "none" && "      DB_URL: ${{ secrets.DB_URL }}"
 );
+var bddJobTs = (a) => a.bdd && [
+  "",
+  "  bdd:",
+  a.lint && "    needs: [quality]",
+  "    runs-on: ubuntu-latest",
+  "    timeout-minutes: 30",
+  "    container:",
+  `      image: mcr.microsoft.com/playwright:v${PW_VERSION}-noble`,
+  "      options: --ipc=host",
+  "    env:",
+  "      CI: true",
+  "      HOME: /root",
+  envSecretsGh(a),
+  "    steps:",
+  "      - uses: actions/checkout@v4",
+  "      - run: npm ci",
+  "      - run: npm run test:bdd",
+  "      - uses: actions/upload-artifact@v4",
+  "        if: ${{ !cancelled() }}",
+  "        with: { name: bdd-results, path: reports/, retention-days: 14 }"
+];
+var bddJobPy = (a) => a.bdd && [
+  "",
+  "  bdd:",
+  a.lint && "    needs: [quality]",
+  "    runs-on: ubuntu-latest",
+  "    timeout-minutes: 30",
+  "    env:",
+  "      CI: true",
+  envSecretsGh(a),
+  "    steps:",
+  "      - uses: actions/checkout@v4",
+  "      - uses: actions/setup-python@v5",
+  "        with: { python-version: '3.12', cache: pip }",
+  "      - run: pip install -r requirements.txt",
+  `      - run: python -m playwright install --with-deps ${installBrowsers(a)[0]}`,
+  "      - run: python -m behave",
+  "      - uses: actions/upload-artifact@v4",
+  "        if: ${{ !cancelled() }}",
+  "        with: { name: bdd-results, path: reports/, retention-days: 14 }"
+];
 function githubWorkflow(a) {
   const n = a.shards;
   const shardMatrix = n > 1 ? [
@@ -1567,6 +1709,7 @@ function githubWorkflow(a) {
         "      - uses: actions/upload-artifact@v4",
         "        with: { name: html-report, path: playwright-report, retention-days: 14 }"
       ],
+      bddJobTs(a),
       ""
     );
   }
@@ -1614,6 +1757,7 @@ function githubWorkflow(a) {
     "            test-results/",
     has(a, "reporters", "allure") && "            allure-results/",
     "          retention-days: 14",
+    bddJobPy(a),
     ""
   );
 }
@@ -1672,6 +1816,21 @@ function gitlabCi(a) {
     has(a, "reporters", "allure") && "      - allure-results/",
     "    reports:",
     "      junit: reports/junit.xml",
+    a.bdd && [
+      "",
+      "bdd:",
+      "  stage: test",
+      "  script:",
+      "    - *install",
+      ts ? "    - npm run test:bdd" : "    - python -m behave",
+      "  artifacts:",
+      "    when: always",
+      "    expire_in: 2 weeks",
+      "    paths:",
+      "      - reports/",
+      "    reports:",
+      ts ? "      junit: reports/cucumber-junit.xml" : "      junit: reports/behave/*.xml"
+    ],
     ""
   );
 }
@@ -1724,10 +1883,17 @@ function jenkinsfile(a) {
     `        ${testCmd}`,
     "      }",
     "    }",
+    a.bdd && [
+      "    stage('BDD') {",
+      "      steps {",
+      ts ? "        sh 'npm run test:bdd'" : "        sh '. .venv/bin/activate && python -m behave'",
+      "      }",
+      "    }"
+    ],
     "  }",
     "  post {",
     "    always {",
-    "      junit allowEmptyResults: true, testResults: 'reports/junit.xml'",
+    `      junit allowEmptyResults: true, testResults: '${a.bdd ? "reports/**/*.xml" : "reports/junit.xml"}'`,
     ts ? "      archiveArtifacts artifacts: 'playwright-report/**, test-results/**, reports/**', allowEmptyArchive: true" : "      archiveArtifacts artifacts: 'reports/**, test-results/**', allowEmptyArchive: true",
     has(a, "reporters", "allure") && "      allure includeProperties: false, results: [[path: 'allure-results']]",
     "    }",
@@ -1820,11 +1986,13 @@ function claudeMd(a) {
     ts ? [
       "- Ejecutar un test: `npx playwright test <ruta> --project=" + a.browsers[0] + " --reporter=list`",
       "- Smoke: `npm run test:smoke`",
+      a.bdd && "- BDD (Cucumber): `npm run test:bdd`",
       a.lint && "- Lint y tipos: `npm run lint && npm run typecheck`",
       "- Traza de un fallo: `npx playwright show-trace <trace.zip>`"
     ] : [
       "- Ejecutar un test: `pytest <ruta> -x`",
       "- Smoke: `pytest -m smoke`",
+      a.bdd && "- BDD (Behave): `python -m behave`",
       a.lint && "- Lint y tipos: `ruff check . && ruff format --check . && mypy .`",
       "- Traza de un fallo: `playwright show-trace <trace.zip>`"
     ],
@@ -1835,6 +2003,7 @@ function claudeMd(a) {
     "- Page objects: locators en el constructor, métodos de intención, SIN aserciones de negocio.",
     "- Page objects y clientes se inyectan por fixtures; nunca se instancian dentro del test.",
     "- Locators: getByRole > getByLabel > getByTestId (`data-qa`) > texto. Prohibido XPath y CSS posicional.",
+    a.bdd && "- BDD: features en `features/`, pasos en `features/steps`; los pasos NO llevan selectores ni lógica: delegan en page objects.",
     "",
     "## Reglas de calidad",
     "- Prohibido `waitForTimeout`/`time.sleep`, `force: true`, `test.only`.",
@@ -2203,6 +2372,34 @@ function claudeSkills(a) {
   };
 }
 
+// src/templates/bdd.ts
+function homeFeature() {
+  return lines(
+    "# language: es",
+    "Característica: Página de inicio",
+    "  Como visitante quiero abrir la página de inicio para empezar a usar la aplicación.",
+    "",
+    "  @smoke",
+    "  Escenario: La página de inicio carga",
+    "    Cuando abro la página de inicio",
+    "    Entonces la página tiene un título",
+    "    Y veo el encabezado principal",
+    "",
+    "  @regression",
+    "  Esquema del escenario: La página de inicio se adapta a <dispositivo>",
+    "    Dado una pantalla de <ancho> x <alto>",
+    "    Cuando abro la página de inicio",
+    "    Entonces veo el encabezado principal",
+    "",
+    "    Ejemplos:",
+    "      | dispositivo | ancho | alto |",
+    "      | escritorio  | 1440  | 900  |",
+    "      | tableta     | 768   | 1024 |",
+    "      | celular     | 390   | 844  |",
+    ""
+  );
+}
+
 // src/templates/common.ts
 function gitignore() {
   return lines(
@@ -2254,6 +2451,12 @@ function envExample(a) {
       "",
       "# Base de datos de QA (usuario de SOLO LECTURA para verificaciones)",
       `DB_URL=${DB_URLS[a.db]}`
+    ],
+    a.bdd && [
+      "",
+      `# BDD (${bddTool(a)}): navegador y modo visible (HEADED=1)`,
+      `BROWSER=${installBrowsers(a)[0]}`,
+      "HEADED="
     ],
     ""
   );
@@ -2450,6 +2653,7 @@ function readme(a, fileList) {
     `| Datos sintéticos | ${yes(a.data)} |`,
     `| Autenticación reutilizable | ${yes(a.auth)} |`,
     `| Extras | ${a.extras.join(", ") || "Ninguno"} |`,
+    `| BDD (Gherkin) | ${a.bdd ? bddTool(a) : "No"} |`,
     `| Contenedores | ${DOCKER_OPTIONS.find((d) => d.value === a.docker)?.label} |`,
     `| CI/CD | ${ciLabels}${a.shards > 1 ? ` (${a.shards} shards)` : ""} |`,
     `| Linters / pre-commit | ${yes(a.lint)} / ${yes(a.precommit)} |`,
@@ -2494,6 +2698,11 @@ function readme(a, fileList) {
       has(a, "reporters", "allure") && "| Reporte Allure | `npm run allure:generate && npm run allure:open` |",
       has(a, "extras", "visual") && "| Visual (crear/actualizar baseline) | `npm run test:visual:update` |",
       has(a, "extras", "visual") && "| Visual (comparar) | `npm run test:visual` |",
+      a.bdd && [
+        "| BDD (Cucumber) | `npm run test:bdd` |",
+        "| BDD solo smoke | `npm run test:bdd -- --tags @smoke` |",
+        "| BDD con navegador visible | `HEADED=1 npm run test:bdd` |"
+      ],
       a.lint && "| Lint / formato / tipos | `npm run lint` · `npm run format` · `npm run typecheck` |"
     ] : [
       "| Toda la suite en paralelo | `pytest -n auto` |",
@@ -2505,6 +2714,11 @@ function readme(a, fileList) {
       '| Emular móvil | `pytest --device "iPhone 15"` |',
       has(a, "reporters", "html") && "| Reporte HTML | `reports/report.html` |",
       has(a, "reporters", "allure") && "| Reporte Allure | `allure serve allure-results` |",
+      a.bdd && [
+        "| BDD (Behave) | `python -m behave` |",
+        "| BDD solo smoke | `python -m behave --tags=@smoke` |",
+        "| BDD con navegador visible | `HEADED=1 python -m behave` |"
+      ],
       a.lint && "| Lint / formato / tipos | `ruff check .` · `ruff format .` · `mypy .` |"
     ],
     has(a, "reporters", "metrics") && "| Métricas de la corrida | `reports/metrics.json` |",
@@ -2522,6 +2736,8 @@ function readme(a, fileList) {
     a.api && "- **API client**: setup rápido de datos y verificaciones sin UI.",
     a.data && "- **Data factories**: datos 100 % sintéticos y únicos por test (paralelismo seguro).",
     a.db !== "none" && "- **DB**: consultas parametrizadas, usuario de solo lectura y guard anti-producción.",
+    a.bdd && `- **BDD (${bddTool(a)})**: los \`.feature\` describen el comportamiento en Gherkin; los pasos delegan en los mismos page objects.`,
+    a.bdd && !ts && "- Python no tiene Cucumber oficial: los `.feature` se ejecutan con **Behave**.",
     "- **Config**: única lectura de variables de entorno; guard que impide ejecutar contra producción.",
     "",
     "## Estructura",
@@ -2756,6 +2972,105 @@ function pyDb(db) {
   return impl[db];
 }
 
+// src/templates/py/bdd.ts
+function pyBehaveIni(a) {
+  return lines(
+    "# Python no tiene Cucumber oficial: los .feature (Gherkin) se ejecutan con Behave → python -m behave",
+    "[behave]",
+    "paths = features",
+    "show_skipped = false",
+    has(a, "reporters", "junit") && ["junit = true", "junit_directory = reports/behave"],
+    ""
+  );
+}
+function pyBehaveEnvironment() {
+  return lines(
+    '"""Hooks de Behave: un navegador por ejecución y un contexto nuevo por escenario."""',
+    "",
+    "from __future__ import annotations",
+    "",
+    "import re",
+    "from pathlib import Path",
+    "",
+    "from behave.model import Scenario",
+    "from behave.runner import Context",
+    "from playwright.sync_api import sync_playwright",
+    "",
+    "from config.env import settings",
+    "from pages.home_page import HomePage",
+    "",
+    'SCREENSHOTS = Path("reports/behave/screenshots")',
+    "",
+    "",
+    "def before_all(context: Context) -> None:",
+    "    context.playwright = sync_playwright().start()",
+    '    context.playwright.selectors.set_test_id_attribute("data-qa")',
+    "    browser_type = getattr(context.playwright, settings.browser)",
+    "    context.browser = browser_type.launch(headless=not settings.headed)",
+    "",
+    "",
+    "def before_scenario(context: Context, _scenario: Scenario) -> None:",
+    "    # Un contexto nuevo por escenario: escenarios independientes entre sí",
+    '    context.browser_context = context.browser.new_context(base_url=settings.base_url, locale="es-CO")',
+    "    context.page = context.browser_context.new_page()",
+    "    context.home_page = HomePage(context.page)",
+    "",
+    "",
+    "def after_scenario(context: Context, scenario: Scenario) -> None:",
+    '    if scenario.status == "failed":',
+    "        SCREENSHOTS.mkdir(parents=True, exist_ok=True)",
+    '        name = re.sub(r"\\W+", "_", scenario.name)',
+    '        context.page.screenshot(path=SCREENSHOTS / f"{name}.png", full_page=True)',
+    "    context.browser_context.close()",
+    "",
+    "",
+    "def after_all(context: Context) -> None:",
+    "    # Si before_all falló puede no haber nada que cerrar",
+    '    if "browser" in context:',
+    "        context.browser.close()",
+    '    if "playwright" in context:',
+    "        context.playwright.stop()",
+    ""
+  );
+}
+function pyHomeSteps() {
+  return lines(
+    '"""Pasos de la página de inicio: describen el comportamiento y delegan en los Page Objects."""',
+    "",
+    "# Behave no publica tipos: sus decoradores no están tipados",
+    "# mypy: disallow-untyped-decorators=False",
+    "",
+    "from __future__ import annotations",
+    "",
+    "import re",
+    "",
+    "from behave import given, then, when",
+    "from behave.runner import Context",
+    "from playwright.sync_api import expect",
+    "",
+    "",
+    '@given("una pantalla de {width:d} x {height:d}")',
+    "def step_set_viewport(context: Context, width: int, height: int) -> None:",
+    '    context.page.set_viewport_size({"width": width, "height": height})',
+    "",
+    "",
+    '@when("abro la página de inicio")',
+    "def step_open_home(context: Context) -> None:",
+    "    context.home_page.goto()",
+    "",
+    "",
+    '@then("la página tiene un título")',
+    "def step_page_has_title(context: Context) -> None:",
+    '    expect(context.page).to_have_title(re.compile(r".+"))',
+    "",
+    "",
+    '@then("veo el encabezado principal")',
+    "def step_see_main_heading(context: Context) -> None:",
+    "    expect(context.home_page.main_heading.first).to_be_visible()",
+    ""
+  );
+}
+
 // src/templates/py/config.ts
 function pyRequirements(a) {
   return lines(
@@ -2775,6 +3090,7 @@ function pyRequirements(a) {
     a.db === "mssql" && "pymssql>=2.3",
     a.db === "mongodb" && "pymongo>=4.8",
     has(a, "extras", "a11y") && "axe-playwright-python>=0.1.4",
+    a.bdd && "behave>=1.2.6            # BDD: python -m behave",
     a.lint && ["ruff>=0.6", "mypy>=1.11"],
     a.precommit && "pre-commit>=3.8",
     ""
@@ -2859,6 +3175,7 @@ function pyEnv(a) {
     "    user_email: str",
     "    user_password: str",
     "    db_url: str",
+    a.bdd && ["    browser: str", "    headed: bool"],
     "",
     "",
     "def _load() -> Settings:",
@@ -2875,6 +3192,10 @@ function pyEnv(a) {
     '        user_email=os.getenv("TEST_USER_EMAIL", ""),',
     '        user_password=os.getenv("TEST_USER_PASSWORD", ""),',
     '        db_url=os.getenv("DB_URL", ""),',
+    a.bdd && [
+      `        browser=os.getenv("BROWSER") or "${installBrowsers(a)[0]}",`,
+      '        headed=os.getenv("HEADED") == "1",'
+    ],
     "    )",
     "",
     "",
@@ -3420,6 +3741,111 @@ function tsDb(db) {
   return impl[db];
 }
 
+// src/templates/ts/bdd.ts
+function tsCucumberConfig(a) {
+  const format = [
+    "progress",
+    has(a, "reporters", "html") && "html:reports/cucumber-report.html",
+    has(a, "reporters", "junit") && "junit:reports/cucumber-junit.xml"
+  ].filter(Boolean);
+  const config = {
+    default: {
+      paths: ["features/**/*.feature"],
+      requireModule: ["tsx/cjs"],
+      require: ["features/support/**/*.ts", "features/steps/**/*.ts"],
+      format,
+      formatOptions: { snippetInterface: "async-await" }
+    }
+  };
+  return JSON.stringify(config, null, 2) + "\n";
+}
+function tsBddWorld() {
+  return lines(
+    "import { World, setWorldConstructor } from '@cucumber/cucumber';",
+    "import type { BrowserContext, Page } from '@playwright/test';",
+    "import type { HomePage } from '../../src/pages/home.page';",
+    "",
+    "/** Estado de un escenario. Los hooks crean un contexto, una página y los Page Objects por escenario. */",
+    "export class AppWorld extends World {",
+    "  context!: BrowserContext;",
+    "  page!: Page;",
+    "  homePage!: HomePage;",
+    "}",
+    "",
+    "setWorldConstructor(AppWorld);",
+    ""
+  );
+}
+function tsBddHooks() {
+  return lines(
+    "import { After, AfterAll, Before, BeforeAll, Status, setDefaultTimeout } from '@cucumber/cucumber';",
+    "import { chromium, firefox, selectors, webkit, type Browser, type BrowserType } from '@playwright/test';",
+    "import { env } from '../../src/config/env';",
+    "import { HomePage } from '../../src/pages/home.page';",
+    "import type { AppWorld } from './world';",
+    "",
+    "const BROWSERS: Record<string, BrowserType | undefined> = { chromium, firefox, webkit };",
+    "",
+    "let browser: Browser | undefined;",
+    "",
+    "setDefaultTimeout(30_000);",
+    "",
+    "// Un navegador por ejecución",
+    "BeforeAll(async function () {",
+    "  const browserType = BROWSERS[env.BROWSER];",
+    "  if (!browserType) throw new Error(`BROWSER no soportado: ${env.BROWSER}`);",
+    "  selectors.setTestIdAttribute('data-qa');",
+    "  browser = await browserType.launch({ headless: !env.HEADED });",
+    "});",
+    "",
+    "// Un contexto nuevo por escenario: escenarios independientes entre sí",
+    "Before(async function (this: AppWorld) {",
+    "  if (!browser) throw new Error('El navegador no se inició');",
+    "  this.context = await browser.newContext({ baseURL: env.BASE_URL, locale: 'es-CO' });",
+    "  this.page = await this.context.newPage();",
+    "  this.homePage = new HomePage(this.page);",
+    "});",
+    "",
+    "After(async function (this: AppWorld, { result }) {",
+    "  if (result?.status === Status.FAILED) {",
+    "    this.attach(await this.page.screenshot({ fullPage: true }), 'image/png');",
+    "  }",
+    "  await this.context.close();",
+    "});",
+    "",
+    "AfterAll(async function () {",
+    "  await browser?.close();",
+    "});",
+    ""
+  );
+}
+function tsHomeSteps() {
+  return lines(
+    "import { Given, Then, When } from '@cucumber/cucumber';",
+    "import { expect } from '@playwright/test';",
+    "import type { AppWorld } from '../support/world';",
+    "",
+    "// Los pasos describen el comportamiento y delegan en los Page Objects: sin selectores aquí.",
+    "",
+    "Given('una pantalla de {int} x {int}', async function (this: AppWorld, width: number, height: number) {",
+    "  await this.page.setViewportSize({ width, height });",
+    "});",
+    "",
+    "When('abro la página de inicio', async function (this: AppWorld) {",
+    "  await this.homePage.goto();",
+    "});",
+    "",
+    "Then('la página tiene un título', async function (this: AppWorld) {",
+    "  await expect(this.page).toHaveTitle(/.+/);",
+    "});",
+    "",
+    "Then('veo el encabezado principal', async function (this: AppWorld) {",
+    "  await expect(this.homePage.mainHeading.first()).toBeVisible();",
+    "});",
+    ""
+  );
+}
+
 // src/templates/ts/config.ts
 function tsPackageJson(a) {
   const scripts = {
@@ -3440,6 +3866,7 @@ function tsPackageJson(a) {
     scripts["allure:generate"] = "allure generate allure-results -o allure-report --clean";
     scripts["allure:open"] = "allure open allure-report";
   }
+  if (a.bdd) scripts["test:bdd"] = "cucumber-js";
   if (a.lint) {
     Object.assign(scripts, {
       lint: "eslint .",
@@ -3470,6 +3897,7 @@ function tsPackageJson(a) {
   if (has(a, "extras", "a11y"))
     Object.assign(dev, { "@axe-core/playwright": "^4.10.1", "playwright-core": PW_VERSION });
   if (has(a, "extras", "visual")) dev["cross-env"] = "^7.0.3";
+  if (a.bdd) Object.assign(dev, { "@cucumber/cucumber": "^12.9.0", tsx: "^4.20.0" });
   if (a.precommit) Object.assign(dev, { husky: "^9.1.7", "lint-staged": "^15.2.10" });
   if (a.db === "postgres") Object.assign(dev, { pg: "^8.13.1", "@types/pg": "^8.11.10" });
   if (a.db === "mysql") dev.mysql2 = "^3.11.4";
@@ -3487,7 +3915,7 @@ function tsPackageJson(a) {
   if (a.precommit) pkg["lint-staged"] = { "*.ts": ["eslint --fix", "prettier --write"] };
   return JSON.stringify(pkg, null, 2) + "\n";
 }
-function tsConfigJson() {
+function tsConfigJson(a) {
   return JSON.stringify(
     {
       compilerOptions: {
@@ -3503,7 +3931,13 @@ function tsConfigJson() {
         forceConsistentCasingInFileNames: true,
         types: ["node"]
       },
-      include: ["*.ts", "src/**/*.ts", "tests/**/*.ts", "reporters/**/*.ts"]
+      include: [
+        "*.ts",
+        "src/**/*.ts",
+        "tests/**/*.ts",
+        "reporters/**/*.ts",
+        ...a.bdd ? ["features/**/*.ts"] : []
+      ]
     },
     null,
     2
@@ -3601,6 +4035,7 @@ function tsEnv(a) {
     "  USER_EMAIL: get('TEST_USER_EMAIL'),",
     "  USER_PASSWORD: get('TEST_USER_PASSWORD'),",
     "  DB_URL: get('DB_URL'),",
+    a.bdd && [`  BROWSER: get('BROWSER', '${installBrowsers(a)[0]}'),`, "  HEADED: get('HEADED') === '1',"],
     "} as const;",
     "",
     "// Guard: evita ejecutar contra producción por error",
@@ -4000,7 +4435,7 @@ function tsVisualSpec() {
 var json = (value) => JSON.stringify(value, null, 2) + "\n";
 function tsFiles(f, a) {
   f.set("package.json", tsPackageJson(a));
-  f.set("tsconfig.json", tsConfigJson());
+  f.set("tsconfig.json", tsConfigJson(a));
   f.set("playwright.config.ts", tsPlaywrightConfig(a));
   f.set("src/config/env.ts", tsEnv(a));
   f.set("src/fixtures/index.ts", tsFixtures(a));
@@ -4023,6 +4458,13 @@ function tsFiles(f, a) {
   if (has(a, "extras", "a11y")) f.set("tests/e2e/a11y.spec.ts", tsA11ySpec());
   if (has(a, "extras", "visual")) f.set("tests/visual/home.visual.spec.ts", tsVisualSpec());
   if (has(a, "reporters", "metrics")) f.set("reporters/metrics-reporter.ts", tsMetricsReporter());
+  if (a.bdd) {
+    f.set("cucumber.json", tsCucumberConfig(a));
+    f.set("features/home.feature", homeFeature());
+    f.set("features/support/world.ts", tsBddWorld());
+    f.set("features/support/hooks.ts", tsBddHooks());
+    f.set("features/steps/home.steps.ts", tsHomeSteps());
+  }
   if (a.lint) {
     f.set("eslint.config.mjs", tsEslintConfig());
     f.set(".prettierrc.json", json({ singleQuote: true, printWidth: 110, trailingComma: "all" }));
@@ -4075,6 +4517,12 @@ function pyFiles(f, a) {
   if (has(a, "reporters", "metrics")) {
     f.set("plugins/__init__.py", "");
     f.set("plugins/metrics.py", pyMetricsPlugin());
+  }
+  if (a.bdd) {
+    f.set("behave.ini", pyBehaveIni(a));
+    f.set("features/home.feature", homeFeature());
+    f.set("features/environment.py", pyBehaveEnvironment());
+    f.set("features/steps/home_steps.py", pyHomeSteps());
   }
   if (a.precommit) f.set(".pre-commit-config.yaml", pyPrecommit());
 }

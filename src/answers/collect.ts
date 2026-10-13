@@ -69,6 +69,10 @@ async function askAnswers(): Promise<RawAnswers> {
     extraOptions(lang),
     d.extras.filter((e) => lang === 'ts' || e !== 'visual'),
   );
+  a.bdd = await askConfirm(
+    lang === 'ts' ? '¿Incluir BDD con Gherkin (Cucumber)?' : '¿Incluir BDD con Gherkin (Behave)?',
+    d.bdd,
+  );
 
   section('4. Reportes y métricas ─────────────────────────────────');
   a.reporters = await askMulti('Reportes a integrar', reporterOptions(lang), d.reporters);
