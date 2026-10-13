@@ -4,7 +4,7 @@ Generador interactivo de frameworks de automatización con **Playwright**, en **
 en **español o inglés** (preguntas, código, comentarios, nombres de tests y documentación).
 Hace preguntas en la terminal y crea un esqueleto listo para trabajar, escalable de un proyecto pequeño a uno empresarial.
 
-- Un solo archivo, **sin dependencias**: solo necesitas **Node.js 18+** (también para generar proyectos Python).
+- Para usarlo basta un solo archivo, **sin dependencias**: solo necesitas **Node.js 18+** (también para generar proyectos Python).
 - Funciona en Windows, macOS y Linux.
 
 ## Uso
@@ -39,7 +39,7 @@ node create-pw-framework.mjs --answers ejemplos/ts-grande-postgres.json --out ./
 | Idioma | Español o English (primera pregunta) |
 | Proyecto | Nombre, lenguaje (TypeScript / Python), tamaño (pequeño, mediano, grande) |
 | Aplicación | URL base, ambientes (dev, qa, staging…), navegadores y dispositivos móviles |
-| Capas | Pruebas de API, base de datos (PostgreSQL, MySQL, SQL Server, MongoDB), datos sintéticos, autenticación reutilizable, accesibilidad, regresión visual |
+| Capas | Pruebas de API, base de datos (PostgreSQL, MySQL, SQL Server, MongoDB), datos sintéticos, autenticación reutilizable, accesibilidad, regresión visual, BDD con Gherkin (Cucumber en TypeScript, Behave en Python) |
 | Reportes | HTML, JUnit, Allure, reporter de métricas propio (flaky rate, duración, tests lentos) |
 | Infraestructura | Docker / docker-compose (con BD efímera), CI: GitHub Actions, Jenkins, GitLab CI, Azure DevOps, número de shards |
 | Calidad e IA | ESLint + Prettier o Ruff + mypy, pre-commit (husky / pre-commit), integración con Claude Code |
@@ -52,6 +52,9 @@ El **tamaño** solo propone valores por defecto; puedes cambiar cualquier respue
 - Configuración centralizada por ambiente (`.env.<ambiente>`) con guard que impide ejecutar contra producción.
 - Tests de ejemplo que pasan sin configuración (los de API y BD se saltan hasta definir `API_URL` / `DB_URL`).
 - Pipelines de CI con sharding, artefactos y publicación de resultados JUnit.
+- Opcional: BDD con Gherkin. En TypeScript se usa **Cucumber** (`@cucumber/cucumber`); en Python, que no tiene Cucumber
+  oficial, **Behave**. Incluye un `.feature` con dos escenarios (uno es un esquema del escenario con ejemplos), los pasos
+  sobre los mismos page objects, hooks de navegador y un job/etapa de BDD en cada pipeline de CI.
 - Opcional: `CLAUDE.md`, `.claude/settings.json` con bloqueo de `.env`, hooks (secretos, PII, lint, puerta final),
   skills (`synthetic-data`, `page-object`, `flaky-triage`), subagentes (planner, generator, healer, reviewer) y `.mcp.json` con Playwright MCP.
 - `README.md` del proyecto con la configuración elegida, comandos, estructura y próximos pasos.
@@ -69,21 +72,41 @@ Proyectos generados y verificados:
 | TS pequeño | `tsc`, ESLint, Prettier |
 | Python grande (mismas opciones) | Ruff, `ruff format`, `mypy --strict`, pytest con xdist, HTML/JUnit/Allure/métricas, hooks de Claude |
 | Python con MySQL, SQL Server y MongoDB; Python pequeño | Ruff + mypy (+ pytest en el pequeño) |
+| TS grande con BDD (Cucumber), en español y en inglés | `tsc`, ESLint, Prettier, `npm run test:bdd` en verde (4 escenarios), reportes HTML y JUnit |
+| Python grande con BDD (Behave), en español y en inglés | Ruff, `ruff format`, `mypy --strict`, `python -m behave` en verde (4 escenarios), JUnit |
 
 ## Idiomas
 
 El español es el idioma fuente de las plantillas. En inglés, cada texto de la terminal y cada archivo generado pasa por
-`tr()` con la tabla `I18N_EN` embebida en el script (reemplazo de frases, de la más larga a la más corta).
+`translate()` con la tabla de `src/i18n/en.ts` (reemplazo de frases, de la más larga a la más corta).
 
-- La tabla se edita en `i18n/en_pairs.py` y se vuelve a embeber con `python3 i18n/inject.py`.
-- Si añades o cambias un texto en español en una plantilla, añade su traducción en `en_pairs.py`.
-- Verificación usada: generar todas las variantes en inglés y buscar caracteres y palabras en español;
-  el proyecto en español es idéntico al de la versión anterior.
+- Si añades o cambias un texto en español en una plantilla, añade su traducción en `src/i18n/en.ts`.
+- Un test genera todas las variantes en inglés y busca caracteres y palabras en español.
 
-## Mantenimiento
+## Desarrollo
 
+`create-pw-framework.mjs` es un archivo **generado**: el código fuente está en `src/` (TypeScript, por módulos) y se
+empaqueta con esbuild. Para usar el generador no hace falta nada de esto; para modificarlo, Node.js 22.18+:
+
+```bash
+npm install
+npm run build     # regenera create-pw-framework.mjs a partir de src/
+npm run check     # tipos, ESLint, Prettier y tests
+```
+
+| Carpeta | Contenido |
+|---|---|
+| `src/cli.ts`, `src/cli/` | Punto de entrada, argumentos, preguntas y mensajes de la terminal |
+| `src/answers/` | Tipos de las respuestas, catálogos de opciones, valores por tamaño y normalización |
+| `src/templates/` | Una función por archivo generado (`ts/`, `py/`, `ci/`, `claude/`, `docs/`) |
+| `src/project/` | Ensamblado del proyecto, escritura en disco e instalación |
+| `src/i18n/` | Tabla de traducción es→en |
+| `tests/` | Tests; `tests/golden/` fija la salida esperada de cada variante |
+
+- Los tests comparan cada archivo generado con una referencia (`tests/golden/`): un refactor no puede cambiar la salida
+  sin que se note. Si el cambio es intencionado: `npm run test:update-golden`.
+- El bundle se confirma en el repo junto con el cambio; un test falla si no está al día con `src/`.
 - Para modificarlo con Claude Code: abre esta carpeta completa; `CLAUDE.md` explica la arquitectura y las reglas.
-- Antes de entregar cambios: `bash scripts/check.sh` (genera todas las variantes ES/EN y valida la salida).
-
-- `PW_VERSION` (al inicio del script) fija `@playwright/test` y la imagen Docker de CI: actualízalos juntos.
-- Para añadir una opción nueva: agrégala al catálogo (`*_OPTIONS`), pregúntala en `collectAnswers` y úsala en `buildProject`.
+- `PW_VERSION` (`src/version.ts`) fija `@playwright/test` y la imagen Docker de CI: actualízalos juntos.
+- Para añadir una opción nueva: tipo en `src/answers/types.ts`, catálogo y valores por tamaño en `catalog.ts`, pregunta en
+  `collect.ts` y uso en las plantillas; el compilador señala lo que falte.

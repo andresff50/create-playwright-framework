@@ -1,0 +1,99 @@
+
+  ▶ create-pw-framework  v1.1.0 · Playwright 1.62.1
+
+  Answer the questions; Enter accepts the suggested value.
+
+
+── 1. Project ───────────────────────────────────────────
+? Project name (qa-e2e-framework): 
+? Framework language
+  › 1) TypeScript — @playwright/test (native runner)
+    2) Python — pytest + pytest-playwright
+  Choose 1-2 (1): 
+? Project size / scale (sets suggested defaults)
+    1) Small — 1 team, < 100 tests, simple structure
+  › 2) Medium — several flows, components, API and data
+    3) Large / enterprise — several teams, sharding, DB, metrics, governance
+  Choose 1-3 (2): 
+
+── 2. Application & execution ──────────────────────────────
+? Base URL of the application under test (https://playwright.dev): 
+? Environments (comma-separated) (qa,staging): 
+? Browsers / devices (comma-separated numbers, Enter = checked values, 0 = none)
+  ◉ 1) Chromium (Desktop Chrome)
+  ◉ 2) Firefox
+  ◯ 3) WebKit (Safari)
+  ◯ 4) Mobile Android (Pixel 7)
+  ◯ 5) Mobile iOS (iPhone 15)
+  › 
+
+── 3. Framework layers ─────────────────────────────────
+? Include API tests and an API client for data setup? (Y/n): 
+? Database connection
+  › 1) No database
+    2) PostgreSQL
+    3) MySQL / MariaDB
+    4) SQL Server
+    5) MongoDB
+  Choose 1-5 (1): 
+? Include synthetic data factories (Faker)? (Y/n): 
+? Include reusable authentication (storageState / log in once)? (Y/n): 
+? Additional tests (comma-separated numbers, Enter = checked values, 0 = none)
+  ◉ 1) Accessibility with axe-core
+  ◯ 2) Visual regression (toHaveScreenshot)
+  › 
+? Include BDD with Gherkin (Cucumber)? (y/N): 
+
+── 4. Reports & metrics ─────────────────────────────────
+? Reports to integrate (comma-separated numbers, Enter = checked values, 0 = none)
+  ◉ 1) Playwright native HTML
+  ◉ 2) JUnit XML — Jenkins, Azure DevOps, GitLab, Xray, TestRail
+  ◯ 3) Allure Report
+  ◯ 4) Custom metrics reporter (JSON) — flaky rate, duration, slow tests
+  › 
+
+── 5. Infrastructure & CI/CD ─────────────────────────────
+? Containers
+    1) No containers
+  › 2) Dockerfile to run the tests
+    3) Dockerfile + docker-compose — tests + ephemeral database
+  Choose 1-3 (2): 
+? CI/CD pipelines (comma-separated numbers, Enter = checked values, 0 = none)
+  ◉ 1) GitHub Actions
+  ◯ 2) Jenkins (Jenkinsfile)
+  ◯ 3) GitLab CI
+  ◯ 4) Azure DevOps
+  › 
+? Number of CI shards (parallel machines) (2): 
+
+── 6. Quality & AI ────────────────────────────────────────
+? Linters and formatting (ESLint + eslint-plugin-playwright + Prettier)? (Y/n): 
+? Pre-commit hooks (husky + lint-staged)? (Y/n): 
+? Integrate Claude Code (CLAUDE.md, .env blocking, hooks, skills, subagents, MCP)? (Y/n): 
+? Initialize a git repository? (Y/n): 
+
+── Summary ────────────────────────────────────────────────
+  Project                qa-e2e-framework (TypeScript, medium)
+  Base URL / envs        https://playwright.dev  [qa, staging]
+  Browsers               chromium, firefox
+  Reports                html, junit
+  API / DB / Data        yes / none / yes
+  Auth / Extras          yes / a11y
+  BDD                    no
+  Docker / CI            dockerfile / github (2 shards)
+  Lint / pre-commit      yes / yes
+  Claude Code            yes
+
+? Generate the project with this configuration? (Y/n): 
+
+  ✔ 40 files generated in <CWD>/out
+  ✔ Git repository initialized
+
+── Next steps ───────────────────────────────────────
+  cd out
+  npm install && npx playwright install chromium firefox
+  cp .env.example .env
+  npm test
+
+  Read README.md for the architecture, commands and next steps.
+

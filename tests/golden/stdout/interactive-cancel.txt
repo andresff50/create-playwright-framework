@@ -1,0 +1,89 @@
+
+  ▶ create-pw-framework  v1.1.0 · Playwright 1.62.1
+
+  Responde las preguntas; Enter acepta el valor sugerido.
+
+
+── 1. Proyecto ───────────────────────────────────────────
+? Nombre del proyecto (qa-e2e-framework): x
+? Lenguaje del framework
+  › 1) TypeScript — @playwright/test (runner nativo)
+    2) Python — pytest + pytest-playwright
+  Elige 1-2 (1): 
+? Tamaño / escala del proyecto (define valores sugeridos)
+    1) Pequeño — 1 equipo, < 100 tests, estructura simple
+  › 2) Mediano — varios flujos, componentes, API y datos
+    3) Grande / empresarial — varios equipos, sharding, BD, métricas, gobierno
+  Elige 1-3 (2): 
+
+── 2. Aplicación y ejecución ──────────────────────────────
+? URL base de la aplicación bajo prueba (https://playwright.dev): 
+? Ambientes (separados por coma) (qa,staging): 
+? Navegadores / dispositivos (números separados por coma, Enter = valores marcados, 0 = ninguno)
+  ◉ 1) Chromium (Desktop Chrome)
+  ◉ 2) Firefox
+  ◯ 3) WebKit (Safari)
+  ◯ 4) Móvil Android (Pixel 7)
+  ◯ 5) Móvil iOS (iPhone 15)
+  › 
+
+── 3. Capas del framework ─────────────────────────────────
+? ¿Incluir pruebas de API y cliente API para setup de datos? (S/n): 
+? Conexión a base de datos
+  › 1) Sin base de datos
+    2) PostgreSQL
+    3) MySQL / MariaDB
+    4) SQL Server
+    5) MongoDB
+  Elige 1-5 (1): 
+? ¿Incluir factories de datos sintéticos (Faker)? (S/n): 
+? ¿Incluir autenticación reutilizable (storageState / login una vez)? (S/n): 
+? Pruebas adicionales (números separados por coma, Enter = valores marcados, 0 = ninguno)
+  ◉ 1) Accesibilidad con axe-core
+  ◯ 2) Regresión visual (toHaveScreenshot)
+  › 
+? ¿Incluir BDD con Gherkin (Cucumber)? (s/N): 
+
+── 4. Reportes y métricas ─────────────────────────────────
+? Reportes a integrar (números separados por coma, Enter = valores marcados, 0 = ninguno)
+  ◉ 1) HTML nativo de Playwright
+  ◉ 2) JUnit XML — Jenkins, Azure DevOps, GitLab, Xray, TestRail
+  ◯ 3) Allure Report
+  ◯ 4) Reporter de métricas propio (JSON) — flaky rate, duración, tests lentos
+  › 
+
+── 5. Infraestructura y CI/CD ─────────────────────────────
+? Contenedores
+    1) Sin contenedores
+  › 2) Dockerfile para ejecutar los tests
+    3) Dockerfile + docker-compose — tests + base de datos efímera
+  Elige 1-3 (2): 
+? Pipelines de CI/CD (números separados por coma, Enter = valores marcados, 0 = ninguno)
+  ◉ 1) GitHub Actions
+  ◯ 2) Jenkins (Jenkinsfile)
+  ◯ 3) GitLab CI
+  ◯ 4) Azure DevOps
+  › 
+? Número de shards (máquinas en paralelo) en CI (2): 
+
+── 6. Calidad e IA ────────────────────────────────────────
+? ¿Linters y formateo (ESLint + eslint-plugin-playwright + Prettier)? (S/n): 
+? ¿Hooks de pre-commit (husky + lint-staged)? (S/n): 
+? ¿Integrar Claude Code (CLAUDE.md, bloqueo de .env, hooks, skills, subagentes, MCP)? (S/n): 
+? ¿Inicializar repositorio git? (S/n): 
+? Carpeta de salida (./x): 
+
+── Resumen ────────────────────────────────────────────────
+  Proyecto               x (TypeScript, medium)
+  URL base / ambientes   https://playwright.dev  [qa, staging]
+  Navegadores            chromium, firefox
+  Reportes               html, junit
+  API / BD / Datos       sí / none / sí
+  Auth / Extras          sí / a11y
+  BDD                    no
+  Docker / CI            dockerfile / github (2 shards)
+  Lint / pre-commit      sí / sí
+  Claude Code            sí
+
+? ¿Generar el proyecto con esta configuración? (S/n): n
+Cancelado.
