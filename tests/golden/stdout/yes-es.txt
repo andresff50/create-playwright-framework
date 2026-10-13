@@ -1,0 +1,29 @@
+
+  ▶ create-pw-framework  v1.1.0 · Playwright 1.62.1
+
+  Responde las preguntas; Enter acepta el valor sugerido.
+
+
+── Resumen ────────────────────────────────────────────────
+  Proyecto               qa-e2e-framework (TypeScript, medium)
+  URL base / ambientes   https://playwright.dev  [qa, staging]
+  Navegadores            chromium, firefox
+  Reportes               html, junit
+  API / BD / Datos       sí / none / sí
+  Auth / Extras          sí / a11y
+  Docker / CI            dockerfile / github (2 shards)
+  Lint / pre-commit      sí / sí
+  Claude Code            sí
+
+
+  ✔ 40 archivos generados en <CWD>/out
+  ✔ Repositorio git inicializado
+
+── Siguientes pasos ───────────────────────────────────────
+  cd out
+  npm install && npx playwright install chromium firefox
+  cp .env.example .env
+  npm test
+
+  Lee README.md para la arquitectura, comandos y próximos pasos.
+

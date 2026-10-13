@@ -1,0 +1,8 @@
+
+create-pw-framework — generates a ready-to-use Playwright framework.
+
+  node create-pw-framework.mjs                 Interactive mode
+  node create-pw-framework.mjs --yes           Default values (TypeScript, medium)
+  node create-pw-framework.mjs --answers f.json  Use saved answers (see scaffold.answers.json)
+  Options: --out <dir>  --lang es|en  --install | --no-install
+

@@ -1,0 +1,28 @@
+
+  ▶ create-pw-framework  v1.1.0 · Playwright 1.62.1
+
+  Answer the questions; Enter accepts the suggested value.
+
+
+── Summary ────────────────────────────────────────────────
+  Project                ts-small (TypeScript, small)
+  Base URL / envs        https://playwright.dev  [qa]
+  Browsers               chromium
+  Reports                html
+  API / DB / Data        no / none / yes
+  Auth / Extras          no / —
+  Docker / CI            none / github
+  Lint / pre-commit      yes / no
+  Claude Code            no
+
+
+  ✔ 17 files generated in <CWD>/out
+
+── Next steps ───────────────────────────────────────
+  cd out
+  npm install && npx playwright install chromium
+  cp .env.example .env
+  npm test
+
+  Read README.md for the architecture, commands and next steps.
+
