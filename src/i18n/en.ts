@@ -1025,4 +1025,70 @@ export const PAIRS: ReadonlyArray<readonly [es: string, en: string]> = [
     '- BDD: features en `features/`, pasos en `features/steps`; los pasos NO llevan selectores ni lógica: delegan en page objects.',
     '- BDD: features in `features/`, steps in `features/steps`; steps carry NO selectors or logic: they delegate to page objects.',
   ],
+
+  // ─────────────── Gestor de dependencias de Python (pip / Poetry) ───────────────
+  ['Gestor de dependencias', 'Dependency manager'],
+  ['entorno virtual manual', 'manual virtual environment'],
+  ['Dependencias', 'Dependencies'],
+  ['Poetry no está instalado: ', 'Poetry is not installed: '],
+  [
+    '# Proyecto de pruebas, no una librería: Poetry solo gestiona dependencias',
+    '# Test project, not a library: Poetry only manages dependencies',
+  ],
+  [
+    '# El entorno virtual queda en /e2e/.venv y va primero en el PATH: pytest se ejecuta sin "poetry run"',
+    '# The virtual environment lives in /e2e/.venv and goes first in the PATH: pytest runs without "poetry run"',
+  ],
+  [
+    '# Las dependencias se instalan antes de copiar el código: la capa se reutiliza entre builds',
+    '# Dependencies are installed before copying the code: the layer is reused between builds',
+  ],
+  // Mismas frases que con pip, pero el comando lleva `poetry run`
+  ['  →  se ejecuta en cada commit', '  →  runs on every commit'],
+  [
+    '# Python no tiene Cucumber oficial: los .feature (Gherkin) se ejecutan con Behave → ',
+    '# Python has no official Cucumber: .feature files (Gherkin) run with Behave → ',
+  ],
+  [
+    '- Antes de terminar: ejecuta el test afectado 3 veces (`poetry run pytest <ruta> --count=3` si tienes pytest-repeat) y el lint.',
+    '- Before finishing: run the affected test 3 times (`poetry run pytest <path> --count=3` if you have pytest-repeat) and the linter.',
+  ],
+  [
+    '- Dependencias: `poetry add <paquete>` (o `--group dev`); no edites versiones a mano ni uses `pip install`.',
+    '- Dependencies: `poetry add <package>` (or `--group dev`); do not edit versions by hand or use `pip install`.',
+  ],
+  // README del proyecto generado
+  ['- Poetry 2.2 o superior', '- Poetry 2.2 or later'],
+  ['# crea .venv e instala las dependencias', '# creates .venv and installs the dependencies'],
+  [
+    'La primera instalación crea `poetry.lock` con las versiones exactas: **súbelo al repositorio** para que',
+    'The first install creates `poetry.lock` with the exact versions: **commit it to the repository** so that',
+  ],
+  ['todo el equipo y el CI usen las mismas.', 'the whole team and CI use the same ones.'],
+  [
+    'Las dependencias se declaran en `pyproject.toml` y sus versiones exactas quedan en `poetry.lock`.',
+    'Dependencies are declared in `pyproject.toml` and their exact versions are kept in `poetry.lock`.',
+  ],
+  [
+    'No uses `pip install` en este proyecto: el paquete no quedaría registrado.',
+    'Do not use `pip install` in this project: the package would not be recorded.',
+  ],
+  ['| Añadir una librería |', '| Add a library |'],
+  ['| Añadir una herramienta de desarrollo |', '| Add a development tool |'],
+  ['| Quitar una librería |', '| Remove a library |'],
+  ['| Actualizar versiones (dentro de los rangos) |', '| Update versions (within the ranges) |'],
+  ['| Ver el árbol de dependencias |', '| Show the dependency tree |'],
+  ['| Ejecutar cualquier comando en el entorno |', '| Run any command in the environment |'],
+  ['| Ver dónde está el entorno virtual |', '| Show where the virtual environment is |'],
+  ['| Validar pyproject.toml y poetry.lock |', '| Validate pyproject.toml and poetry.lock |'],
+  ['<paquete>', '<package>'],
+  ['<comando>', '<command>'],
+  [
+    '- El entorno virtual vive en `./.venv` (ver `poetry.toml`), así el editor lo detecta solo.',
+    '- The virtual environment lives in `./.venv` (see `poetry.toml`), so the editor detects it automatically.',
+  ],
+  [
+    '- Ruff, mypy y pre-commit están en el grupo `dev`, separados de lo que necesitan los tests.',
+    '- Ruff, mypy and pre-commit are in the `dev` group, separate from what the tests need.',
+  ],
 ];

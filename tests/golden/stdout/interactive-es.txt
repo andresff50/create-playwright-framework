@@ -1,5 +1,5 @@
 
-  ▶ create-pw-framework  v1.1.0 · Playwright 1.62.1
+  ▶ create-pw-framework  v1.2.0 · Playwright 1.62.1
 
 ? Idioma / Language  (preguntas, código y documentación / questions, code and docs)
   › 1) Español
@@ -16,6 +16,12 @@
 ? Lenguaje del framework
   › 1) TypeScript — @playwright/test (runner nativo)
     2) Python — pytest + pytest-playwright
+  Elige 1-2 (1): 2
+? Gestor de dependencias
+  › 1) pip + requirements.txt — entorno virtual manual
+    2) Poetry — pyproject.toml + poetry.lock
+  Elige 1-2 (1): 5
+  ✖ Opción inválida
   Elige 1-2 (1): 2
 ? Tamaño / escala del proyecto (define valores sugeridos)
     1) Pequeño — 1 equipo, < 100 tests, estructura simple
@@ -87,6 +93,7 @@
 
 ── Resumen ────────────────────────────────────────────────
   Proyecto               demo-es (Python, large)
+  Dependencias           Poetry
   URL base / ambientes   https://example.com  [qa, staging]
   Navegadores            chromium, firefox
   Reportes               html, junit
@@ -104,10 +111,9 @@
 
 ── Siguientes pasos ───────────────────────────────────────
   cd out
-  python -m venv .venv && source .venv/bin/activate
-  pip install -r requirements.txt && python -m playwright install chromium firefox
+  poetry install && poetry run python -m playwright install chromium firefox
   cp .env.example .env
-  pytest
+  poetry run pytest
 
   Lee README.md para la arquitectura, comandos y próximos pasos.
 

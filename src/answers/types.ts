@@ -4,6 +4,8 @@
 export type Language = 'es' | 'en';
 /** Lenguaje del framework generado. */
 export type Lang = 'ts' | 'py';
+/** Gestor de dependencias: npm en TypeScript; pip o Poetry en Python. */
+export type PackageManager = 'npm' | 'pip' | 'poetry';
 export type Size = 'small' | 'medium' | 'large';
 export type Browser = 'chromium' | 'firefox' | 'webkit' | 'mobile-chrome' | 'mobile-safari';
 export type Reporter = 'html' | 'junit' | 'allure' | 'metrics';
@@ -45,6 +47,7 @@ export interface Answers extends SizeDefaults {
   language: Language;
   size: Size;
   lang: Lang;
+  packageManager: PackageManager;
   name: string;
   baseUrl: string;
   git: boolean;

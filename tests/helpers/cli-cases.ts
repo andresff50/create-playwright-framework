@@ -24,6 +24,10 @@ export const CLI_CASES: CliCase[] = [
     args: ['--answers', example('py-grande-postgres.json'), '--out', './out', '--no-install'],
   },
   {
+    id: 'answers-py-poetry-en',
+    args: ['--answers', example('en-py-small-poetry.json'), '--out', './out', '--no-install'],
+  },
+  {
     id: 'answers-ts-en',
     args: ['--answers', example('en-ts-large-postgres.json'), '--out', './out', '--no-install'],
   },
@@ -39,6 +43,8 @@ export const CLI_CASES: CliCase[] = [
       'Nombre Malo', // inválido → vuelve a preguntar
       'demo-es',
       '2', // Python
+      '5', // gestor fuera de rango
+      '2', // Poetry
       '3', // grande
       'ftp://x', // URL inválida
       'https://example.com',

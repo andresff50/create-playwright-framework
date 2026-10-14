@@ -2,7 +2,7 @@ import path from 'node:path';
 import process from 'node:process';
 import type { Answers } from '../answers/types.ts';
 import { tr } from '../i18n/index.ts';
-import { bddTool, installBrowsers } from '../templates/helpers.ts';
+import { bddTool, installBrowsers, packageManagerLabel, pyRun, usesPoetry } from '../templates/helpers.ts';
 import { c, log } from './console.ts';
 
 export function printSummary(a: Answers): void {
@@ -10,6 +10,7 @@ export function printSummary(a: Answers): void {
   const yn = (b: boolean): string => (b ? (a.language === 'en' ? 'yes' : 'sí') : 'no');
   log(c.magenta('\n── Resumen ────────────────────────────────────────────────'));
   row('Proyecto', `${a.name} (${a.lang === 'ts' ? 'TypeScript' : 'Python'}, ${a.size})`);
+  row('Dependencias', packageManagerLabel(a));
   row('URL base / ambientes', `${a.baseUrl}  [${a.envs.join(', ')}]`);
   row('Navegadores', a.browsers.join(', '));
   row('Reportes', a.reporters.join(', ') || 'list');
@@ -28,14 +29,17 @@ export function printNextSteps(a: Answers, outDir: string, installed: boolean): 
   log(`  cd ${rel}`);
   if (!installed) {
     if (a.lang === 'ts') log(`  npm install && npx playwright install ${browsers}`);
+    else if (usesPoetry(a)) log(`  poetry install && poetry run python -m playwright install ${browsers}`);
     else {
       log(
         `  python -m venv .venv && source .venv/bin/activate\n  pip install -r requirements.txt && python -m playwright install ${browsers}`,
       );
     }
-  } else if (a.lang === 'py') log('  source .venv/bin/activate   (Windows: .venv\\Scripts\\activate)');
+  } else if (a.lang === 'py' && !usesPoetry(a)) {
+    log('  source .venv/bin/activate   (Windows: .venv\\Scripts\\activate)');
+  }
   log('  cp .env.example .env');
-  log(a.lang === 'ts' ? '  npm test' : '  pytest');
+  log(a.lang === 'ts' ? '  npm test' : `  ${pyRun(a, 'pytest')}`);
   log(c.dim('\n  Lee README.md para la arquitectura, comandos y próximos pasos.\n'));
 }
 

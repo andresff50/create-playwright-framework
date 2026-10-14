@@ -1,12 +1,22 @@
 import type { Answers } from '../../answers/types.ts';
-import { lines, has, installBrowsers } from '../helpers.ts';
+import { lines, has, installBrowsers, pyInstallCommands, pyQualityCommands, usesPoetry } from '../helpers.ts';
 import { PW_VERSION } from '../../version.ts';
 
 export function jenkinsfile(a: Answers): string {
   const ts = a.lang === 'ts';
+  // Python: con pip se activa el entorno virtual en cada paso; con Poetry se usa `poetry run`
+  const poetry = usesPoetry(a);
+  const pySh = (command: string): string =>
+    poetry ? `sh 'poetry run ${command}'` : `sh '. .venv/bin/activate && ${command}'`;
+  const pyInstall = poetry
+    ? pyInstallCommands(a).join(' && ')
+    : 'python -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt';
+  const pyLint = poetry
+    ? `sh '${pyQualityCommands(a).join(' && ')}'`
+    : pySh('ruff check . && ruff format --check . && mypy .');
   const testCmd = ts
     ? `sh 'npx playwright test \${GREP:+--grep "$GREP"}'`
-    : `sh '. .venv/bin/activate && pytest -n auto --reruns 2 \${GREP:+-m "$GREP"}'`;
+    : pySh('pytest -n auto --reruns 2 ${GREP:+-m "$GREP"}');
   return lines(
     '// Requiere plugins: Docker Pipeline, JUnit' + (has(a, 'reporters', 'allure') ? ', Allure Jenkins' : ''),
     'pipeline {',
@@ -38,17 +48,15 @@ export function jenkinsfile(a: Answers): string {
     ts
       ? "        sh 'npm ci'"
       : [
-          "        sh 'python -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt'",
-          `        sh '. .venv/bin/activate && python -m playwright install --with-deps ${installBrowsers(a).join(' ')}'`,
+          `        sh '${pyInstall}'`,
+          `        ${pySh(`python -m playwright install --with-deps ${installBrowsers(a).join(' ')}`)}`,
         ],
     '      }',
     '    }',
     a.lint && [
       "    stage('Lint') {",
       '      steps {',
-      ts
-        ? "        sh 'npm run lint && npm run typecheck'"
-        : "        sh '. .venv/bin/activate && ruff check . && ruff format --check . && mypy .'",
+      ts ? "        sh 'npm run lint && npm run typecheck'" : `        ${pyLint}`,
       '      }',
       '    }',
     ],
@@ -60,7 +68,7 @@ export function jenkinsfile(a: Answers): string {
     a.bdd && [
       "    stage('BDD') {",
       '      steps {',
-      ts ? "        sh 'npm run test:bdd'" : "        sh '. .venv/bin/activate && python -m behave'",
+      ts ? "        sh 'npm run test:bdd'" : `        ${pySh('python -m behave')}`,
       '      }',
       '    }',
     ],

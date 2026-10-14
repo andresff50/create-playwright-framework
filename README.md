@@ -21,6 +21,9 @@ node create-pw-framework.mjs --lang en
 
 # Reutilizar respuestas guardadas (cada proyecto generado incluye scaffold.answers.json)
 node create-pw-framework.mjs --answers ejemplos/ts-grande-postgres.json --out ./mi-framework --no-install
+
+# Proyecto Python con Poetry (en lugar de pip + requirements.txt)
+node create-pw-framework.mjs --answers ejemplos/py-grande-poetry.json --out ./mi-framework-poetry
 ```
 
 | Opción | Descripción |
@@ -37,7 +40,7 @@ node create-pw-framework.mjs --answers ejemplos/ts-grande-postgres.json --out ./
 | Bloque | Preguntas |
 |---|---|
 | Idioma | Español o English (primera pregunta) |
-| Proyecto | Nombre, lenguaje (TypeScript / Python), tamaño (pequeño, mediano, grande) |
+| Proyecto | Nombre, lenguaje (TypeScript / Python), gestor de dependencias en Python (pip o Poetry), tamaño (pequeño, mediano, grande) |
 | Aplicación | URL base, ambientes (dev, qa, staging…), navegadores y dispositivos móviles |
 | Capas | Pruebas de API, base de datos (PostgreSQL, MySQL, SQL Server, MongoDB), datos sintéticos, autenticación reutilizable, accesibilidad, regresión visual, BDD con Gherkin (Cucumber en TypeScript, Behave en Python) |
 | Reportes | HTML, JUnit, Allure, reporter de métricas propio (flaky rate, duración, tests lentos) |
@@ -55,6 +58,9 @@ El **tamaño** solo propone valores por defecto; puedes cambiar cualquier respue
 - Opcional: BDD con Gherkin. En TypeScript se usa **Cucumber** (`@cucumber/cucumber`); en Python, que no tiene Cucumber
   oficial, **Behave**. Incluye un `.feature` con dos escenarios (uno es un esquema del escenario con ejemplos), los pasos
   sobre los mismos page objects, hooks de navegador y un job/etapa de BDD en cada pipeline de CI.
+- En Python, dependencias con **pip** (`requirements.txt` y entorno virtual manual) o con **Poetry**: `pyproject.toml` con
+  metadatos estándar, herramientas de lint en el grupo `dev`, `poetry.toml` (entorno en `./.venv`) y todos los comandos,
+  pipelines de CI y Dockerfile con `poetry install` / `poetry run`. Poetry sustituye a pip, no a pytest: los tests no cambian.
 - Opcional: `CLAUDE.md`, `.claude/settings.json` con bloqueo de `.env`, hooks (secretos, PII, lint, puerta final),
   skills (`synthetic-data`, `page-object`, `flaky-triage`), subagentes (planner, generator, healer, reviewer) y `.mcp.json` con Playwright MCP.
 - `README.md` del proyecto con la configuración elegida, comandos, estructura y próximos pasos.
@@ -74,6 +80,9 @@ Proyectos generados y verificados:
 | Python con MySQL, SQL Server y MongoDB; Python pequeño | Ruff + mypy (+ pytest en el pequeño) |
 | TS grande con BDD (Cucumber), en español y en inglés | `tsc`, ESLint, Prettier, `npm run test:bdd` en verde (4 escenarios), reportes HTML y JUnit |
 | Python grande con BDD (Behave), en español y en inglés | Ruff, `ruff format`, `mypy --strict`, `python -m behave` en verde (4 escenarios), JUnit |
+| Python grande con Poetry y BDD, en español y en inglés (sin pre-commit) | `poetry check`, `poetry install`, Ruff, `ruff format`, `mypy --strict`, `poetry run pytest` y Behave en verde, `poetry add --group dev`, instalación desde el generador |
+
+Los pipelines de CI y los Dockerfile se validan como YAML/sintaxis, no se ejecutan.
 
 ## Idiomas
 
@@ -108,5 +117,7 @@ npm run check     # tipos, ESLint, Prettier y tests
 - El bundle se confirma en el repo junto con el cambio; un test falla si no está al día con `src/`.
 - Para modificarlo con Claude Code: abre esta carpeta completa; `CLAUDE.md` explica la arquitectura y las reglas.
 - `PW_VERSION` (`src/version.ts`) fija `@playwright/test` y la imagen Docker de CI: actualízalos juntos.
+- `POETRY_VERSION` fija la versión de Poetry en los pipelines y el Dockerfile de los proyectos Python con Poetry.
+- Las dependencias de Python se declaran una sola vez en `src/templates/py/deps.ts`; de ahí salen `requirements.txt` y `pyproject.toml`.
 - Para añadir una opción nueva: tipo en `src/answers/types.ts`, catálogo y valores por tamaño en `catalog.ts`, pregunta en
   `collect.ts` y uso en las plantillas; el compilador señala lo que falte.

@@ -1,5 +1,5 @@
 import type { Answers } from '../../answers/types.ts';
-import { lines } from '../helpers.ts';
+import { lines, pyQualityCommands, pyRun, usesPoetry } from '../helpers.ts';
 
 export function claudeMd(a: Answers): string {
   const ts = a.lang === 'ts';
@@ -16,11 +16,13 @@ export function claudeMd(a: Answers): string {
           '- Traza de un fallo: `npx playwright show-trace <trace.zip>`',
         ]
       : [
-          '- Ejecutar un test: `pytest <ruta> -x`',
-          '- Smoke: `pytest -m smoke`',
-          a.bdd && '- BDD (Behave): `python -m behave`',
-          a.lint && '- Lint y tipos: `ruff check . && ruff format --check . && mypy .`',
-          '- Traza de un fallo: `playwright show-trace <trace.zip>`',
+          `- Ejecutar un test: \`${pyRun(a, 'pytest <ruta> -x')}\``,
+          `- Smoke: \`${pyRun(a, 'pytest -m smoke')}\``,
+          a.bdd && `- BDD (Behave): \`${pyRun(a, 'python -m behave')}\``,
+          a.lint && `- Lint y tipos: \`${pyQualityCommands(a).join(' && ')}\``,
+          `- Traza de un fallo: \`${pyRun(a, 'playwright show-trace <trace.zip>')}\``,
+          usesPoetry(a) &&
+            '- Dependencias: `poetry add <paquete>` (o `--group dev`); no edites versiones a mano ni uses `pip install`.',
         ],
     '',
     '## Arquitectura (obligatoria)',
@@ -39,7 +41,7 @@ export function claudeMd(a: Answers): string {
     '- Web-first assertions siempre. Tests independientes con datos propios y teardown.',
     ts
       ? '- Antes de terminar: ejecuta el test afectado con `--repeat-each=3` y el lint.'
-      : '- Antes de terminar: ejecuta el test afectado 3 veces (`pytest <ruta> --count=3` si tienes pytest-repeat) y el lint.',
+      : `- Antes de terminar: ejecuta el test afectado 3 veces (\`${pyRun(a, 'pytest <ruta> --count=3')}\` si tienes pytest-repeat) y el lint.`,
     '',
     '## Seguridad y datos (NO negociable)',
     '- NUNCA leas, muestres ni copies archivos `.env*` (excepto `.env.example`) ni `.auth/`.',

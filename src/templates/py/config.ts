@@ -1,30 +1,6 @@
 import type { Answers } from '../../answers/types.ts';
-import { has, installBrowsers, lines } from '../helpers.ts';
-
-export function pyRequirements(a: Answers): string {
-  return lines(
-    '# Instalar: python -m pip install -r requirements.txt',
-    `playwright>=1.55`,
-    'pytest>=8.3',
-    'pytest-playwright>=0.7',
-    'pytest-xdist>=3.6        # paralelismo: pytest -n auto',
-    'pytest-rerunfailures>=14 # reintentos en CI: --reruns 2',
-    'python-dotenv>=1.0',
-    a.shards > 1 && 'pytest-split>=0.10       # sharding en CI: --splits N --group i',
-    has(a, 'reporters', 'html') && 'pytest-html>=4.1',
-    has(a, 'reporters', 'allure') && 'allure-pytest>=2.13',
-    a.data && ['Faker>=30.0', 'factory-boy>=3.3'],
-    a.db === 'postgres' && ['psycopg[binary]>=3.2', 'psycopg-pool>=3.2'],
-    a.db === 'mysql' && 'PyMySQL>=1.1',
-    a.db === 'mssql' && 'pymssql>=2.3',
-    a.db === 'mongodb' && 'pymongo>=4.8',
-    has(a, 'extras', 'a11y') && 'axe-playwright-python>=0.1.4',
-    a.bdd && 'behave>=1.2.6            # BDD: python -m behave',
-    a.lint && ['ruff>=0.6', 'mypy>=1.11'],
-    a.precommit && 'pre-commit>=3.8',
-    '',
-  );
-}
+import { has, installBrowsers, lines, pyRun, usesPoetry } from '../helpers.ts';
+import { pyDevDependencyGroup, pyProjectDependencies } from './deps.ts';
 
 export function pyProject(a: Answers): string {
   const addopts = [
@@ -43,7 +19,20 @@ export function pyProject(a: Answers): string {
     `name = "${a.name}"`,
     'version = "0.1.0"',
     'description = "Framework de automatización E2E con Playwright + pytest"',
-    'requires-python = ">=3.11"',
+    // Poetry resuelve para todo el rango: sin límite superior choca con paquetes que declaran <4.0
+    usesPoetry(a) ? 'requires-python = ">=3.11,<4.0"' : 'requires-python = ">=3.11"',
+    usesPoetry(a) && [
+      pyProjectDependencies(a),
+      pyDevDependencyGroup(a),
+      '',
+      '[tool.poetry]',
+      '# Proyecto de pruebas, no una librería: Poetry solo gestiona dependencias',
+      'package-mode = false',
+      '',
+      '[build-system]',
+      'requires = ["poetry-core>=2.0"]',
+      'build-backend = "poetry.core.masonry.api"',
+    ],
     '',
     '[tool.pytest.ini_options]',
     'testpaths = ["tests"]',
@@ -137,9 +126,14 @@ export function pyEnv(a: Answers): string {
   );
 }
 
-export function pyPrecommit(): string {
+/** Configuración local de Poetry: el entorno virtual vive en ./.venv, igual que con pip. */
+export function poetryToml(): string {
+  return lines('[virtualenvs]', 'in-project = true', '');
+}
+
+export function pyPrecommit(a: Answers): string {
   return lines(
-    '# pre-commit install  →  se ejecuta en cada commit',
+    `# ${pyRun(a, 'pre-commit install')}  →  se ejecuta en cada commit`,
     'repos:',
     '  - repo: https://github.com/astral-sh/ruff-pre-commit',
     '    rev: v0.6.9',

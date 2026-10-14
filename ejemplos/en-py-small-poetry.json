@@ -1,0 +1,8 @@
+{
+  "language": "en",
+  "name": "py-small-poetry",
+  "lang": "py",
+  "packageManager": "poetry",
+  "size": "small",
+  "git": false
+}

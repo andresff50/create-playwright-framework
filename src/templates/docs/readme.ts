@@ -1,8 +1,17 @@
 import type { Answers } from '../../answers/types.ts';
 import { SIZES, DB_OPTIONS, DOCKER_OPTIONS, CI_OPTIONS } from '../../answers/catalog.ts';
 import { buildTree } from './tree.ts';
-import { bddTool, lines, has, installBrowsers } from '../helpers.ts';
-import { PW_VERSION, GENERATOR_VERSION } from '../../version.ts';
+import {
+  bddTool,
+  lines,
+  has,
+  installBrowsers,
+  packageManagerLabel,
+  pyQualityCommands,
+  pyRun,
+  usesPoetry,
+} from '../helpers.ts';
+import { POETRY_MIN_VERSION, PW_VERSION, GENERATOR_VERSION } from '../../version.ts';
 
 export function readme(a: Answers, fileList: string[]): string {
   const ts = a.lang === 'ts';
@@ -10,6 +19,10 @@ export function readme(a: Answers, fileList: string[]): string {
   const dbLabel = DB_OPTIONS.find((d) => d.value === a.db)?.label;
   const ciLabels = a.ci.map((x) => CI_OPTIONS.find((o) => o.value === x)?.label).join(', ') || 'Ninguno';
   const tree = buildTree(fileList);
+  const poetry = usesPoetry(a);
+  const browsers = installBrowsers(a).join(' ');
+  // Comando de Python dentro de una celda o lista: con Poetry lleva `poetry run`
+  const py = (command: string): string => pyRun(a, command);
   return lines(
     `# ${a.name}`,
     '',
@@ -21,6 +34,7 @@ export function readme(a: Answers, fileList: string[]): string {
     '| Opción | Valor |',
     '|---|---|',
     `| Tamaño | ${SIZES.find((s) => s.value === a.size)?.label} |`,
+    `| Dependencias | ${packageManagerLabel(a)} |`,
     `| Navegadores | ${a.browsers.join(', ')} |`,
     `| Ambientes | ${a.envs.join(', ')} |`,
     `| Reportes | ${a.reporters.join(', ') || 'list'} |`,
@@ -38,6 +52,7 @@ export function readme(a: Answers, fileList: string[]): string {
     '## Requisitos',
     '',
     ts ? '- Node.js 20 o superior' : '- Python 3.11 o superior',
+    poetry && `- Poetry ${POETRY_MIN_VERSION} o superior (https://python-poetry.org/docs/#installation)`,
     a.docker !== 'none' && '- Docker (opcional, para ejecutar en contenedor)',
     has(a, 'reporters', 'allure') && '- Java 8+ para generar el reporte Allure localmente',
     '',
@@ -51,16 +66,28 @@ export function readme(a: Answers, fileList: string[]): string {
           'cp .env.example .env        # completa los valores (nunca subas .env)',
           'npm test',
         ]
-      : [
-          'python -m venv .venv',
-          'source .venv/bin/activate   # Windows: .venv\\Scripts\\activate',
-          'pip install -r requirements.txt',
-          `python -m playwright install ${installBrowsers(a).join(' ')}`,
-          'cp .env.example .env        # completa los valores (nunca subas .env)',
-          'pytest',
-        ],
+      : poetry
+        ? [
+            'poetry install              # crea .venv e instala las dependencias',
+            `poetry run python -m playwright install ${browsers}`,
+            'cp .env.example .env        # completa los valores (nunca subas .env)',
+            'poetry run pytest',
+          ]
+        : [
+            'python -m venv .venv',
+            'source .venv/bin/activate   # Windows: .venv\\Scripts\\activate',
+            'pip install -r requirements.txt',
+            `python -m playwright install ${browsers}`,
+            'cp .env.example .env        # completa los valores (nunca subas .env)',
+            'pytest',
+          ],
     '```',
     '',
+    poetry && [
+      'La primera instalación crea `poetry.lock` con las versiones exactas: **súbelo al repositorio** para que',
+      'todo el equipo y el CI usen las mismas.',
+      '',
+    ],
     '## Comandos útiles',
     '',
     '| Acción | Comando |',
@@ -87,21 +114,22 @@ export function readme(a: Answers, fileList: string[]): string {
           a.lint && '| Lint / formato / tipos | `npm run lint` · `npm run format` · `npm run typecheck` |',
         ]
       : [
-          '| Toda la suite en paralelo | `pytest -n auto` |',
-          '| Solo smoke | `pytest -m smoke` |',
-          '| Con navegador visible | `pytest --headed --slowmo 300` |',
-          '| Depurar | `PWDEBUG=1 pytest <ruta> -s` |',
-          '| Reintentos (CI) | `pytest --reruns 2` |',
-          `| Otro ambiente | \`TEST_ENV=${a.envs[a.envs.length - 1]} pytest\` |`,
-          '| Emular móvil | `pytest --device "iPhone 15"` |',
+          `| Toda la suite en paralelo | \`${py('pytest -n auto')}\` |`,
+          `| Solo smoke | \`${py('pytest -m smoke')}\` |`,
+          `| Con navegador visible | \`${py('pytest --headed --slowmo 300')}\` |`,
+          `| Depurar | \`PWDEBUG=1 ${py('pytest <ruta> -s')}\` |`,
+          `| Reintentos (CI) | \`${py('pytest --reruns 2')}\` |`,
+          `| Otro ambiente | \`TEST_ENV=${a.envs[a.envs.length - 1]} ${py('pytest')}\` |`,
+          `| Emular móvil | \`${py('pytest --device "iPhone 15"')}\` |`,
           has(a, 'reporters', 'html') && '| Reporte HTML | `reports/report.html` |',
           has(a, 'reporters', 'allure') && '| Reporte Allure | `allure serve allure-results` |',
           a.bdd && [
-            '| BDD (Behave) | `python -m behave` |',
-            '| BDD solo smoke | `python -m behave --tags=@smoke` |',
-            '| BDD con navegador visible | `HEADED=1 python -m behave` |',
+            `| BDD (Behave) | \`${py('python -m behave')}\` |`,
+            `| BDD solo smoke | \`${py('python -m behave --tags=@smoke')}\` |`,
+            `| BDD con navegador visible | \`HEADED=1 ${py('python -m behave')}\` |`,
           ],
-          a.lint && '| Lint / formato / tipos | `ruff check .` · `ruff format .` · `mypy .` |',
+          a.lint &&
+            `| Lint / formato / tipos | \`${py('ruff check .')}\` · \`${py('ruff format .')}\` · \`${py('mypy .')}\` |`,
         ],
     has(a, 'reporters', 'metrics') && '| Métricas de la corrida | `reports/metrics.json` |',
     a.docker !== 'none' &&
@@ -109,6 +137,27 @@ export function readme(a: Answers, fileList: string[]): string {
         ? '| En contenedores | `docker compose up --build --exit-code-from tests` |'
         : `| En contenedor | \`docker build -t ${a.name} . && docker run --rm --ipc=host ${a.name}\` |`),
     '',
+    poetry && [
+      '## Dependencias (Poetry)',
+      '',
+      'Las dependencias se declaran en `pyproject.toml` y sus versiones exactas quedan en `poetry.lock`.',
+      'No uses `pip install` en este proyecto: el paquete no quedaría registrado.',
+      '',
+      '| Acción | Comando |',
+      '|---|---|',
+      '| Añadir una librería | `poetry add <paquete>` |',
+      '| Añadir una herramienta de desarrollo | `poetry add --group dev <paquete>` |',
+      '| Quitar una librería | `poetry remove <paquete>` |',
+      '| Actualizar versiones (dentro de los rangos) | `poetry update` |',
+      '| Ver el árbol de dependencias | `poetry show --tree` |',
+      '| Ejecutar cualquier comando en el entorno | `poetry run <comando>` |',
+      '| Ver dónde está el entorno virtual | `poetry env info` |',
+      a.lint && `| Validar pyproject.toml y poetry.lock | \`${pyQualityCommands(a)[0]}\` |`,
+      '',
+      '- El entorno virtual vive en `./.venv` (ver `poetry.toml`), así el editor lo detecta solo.',
+      a.lint && '- Ruff, mypy y pre-commit están en el grupo `dev`, separados de lo que necesitan los tests.',
+      '',
+    ],
     '## Arquitectura',
     '',
     '```text',

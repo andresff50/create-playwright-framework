@@ -1,11 +1,12 @@
 
-  ▶ create-pw-framework  v1.1.0 · Playwright 1.62.1
+  ▶ create-pw-framework  v1.2.0 · Playwright 1.62.1
 
   Responde las preguntas; Enter acepta el valor sugerido.
 
 
 ── Resumen ────────────────────────────────────────────────
   Proyecto               qa-e2e-framework (TypeScript, medium)
+  Dependencias           npm
   URL base / ambientes   https://playwright.dev  [qa, staging]
   Navegadores            chromium, firefox
   Reportes               html, junit

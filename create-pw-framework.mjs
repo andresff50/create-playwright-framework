@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ARCHIVO GENERADO por `npm run build` a partir de src/. No lo edites a mano.
-// Generado: 2026-10-13T01:24:00Z
+// Generado: 2026-10-14T01:14:58Z
 
 // src/cli.ts
 import fs4 from "node:fs";
@@ -1038,6 +1038,71 @@ var PAIRS = [
   [
     "- BDD: features en `features/`, pasos en `features/steps`; los pasos NO llevan selectores ni lógica: delegan en page objects.",
     "- BDD: features in `features/`, steps in `features/steps`; steps carry NO selectors or logic: they delegate to page objects."
+  ],
+  // ─────────────── Gestor de dependencias de Python (pip / Poetry) ───────────────
+  ["Gestor de dependencias", "Dependency manager"],
+  ["entorno virtual manual", "manual virtual environment"],
+  ["Dependencias", "Dependencies"],
+  ["Poetry no está instalado: ", "Poetry is not installed: "],
+  [
+    "# Proyecto de pruebas, no una librería: Poetry solo gestiona dependencias",
+    "# Test project, not a library: Poetry only manages dependencies"
+  ],
+  [
+    '# El entorno virtual queda en /e2e/.venv y va primero en el PATH: pytest se ejecuta sin "poetry run"',
+    '# The virtual environment lives in /e2e/.venv and goes first in the PATH: pytest runs without "poetry run"'
+  ],
+  [
+    "# Las dependencias se instalan antes de copiar el código: la capa se reutiliza entre builds",
+    "# Dependencies are installed before copying the code: the layer is reused between builds"
+  ],
+  // Mismas frases que con pip, pero el comando lleva `poetry run`
+  ["  →  se ejecuta en cada commit", "  →  runs on every commit"],
+  [
+    "# Python no tiene Cucumber oficial: los .feature (Gherkin) se ejecutan con Behave → ",
+    "# Python has no official Cucumber: .feature files (Gherkin) run with Behave → "
+  ],
+  [
+    "- Antes de terminar: ejecuta el test afectado 3 veces (`poetry run pytest <ruta> --count=3` si tienes pytest-repeat) y el lint.",
+    "- Before finishing: run the affected test 3 times (`poetry run pytest <path> --count=3` if you have pytest-repeat) and the linter."
+  ],
+  [
+    "- Dependencias: `poetry add <paquete>` (o `--group dev`); no edites versiones a mano ni uses `pip install`.",
+    "- Dependencies: `poetry add <package>` (or `--group dev`); do not edit versions by hand or use `pip install`."
+  ],
+  // README del proyecto generado
+  ["- Poetry 2.2 o superior", "- Poetry 2.2 or later"],
+  ["# crea .venv e instala las dependencias", "# creates .venv and installs the dependencies"],
+  [
+    "La primera instalación crea `poetry.lock` con las versiones exactas: **súbelo al repositorio** para que",
+    "The first install creates `poetry.lock` with the exact versions: **commit it to the repository** so that"
+  ],
+  ["todo el equipo y el CI usen las mismas.", "the whole team and CI use the same ones."],
+  [
+    "Las dependencias se declaran en `pyproject.toml` y sus versiones exactas quedan en `poetry.lock`.",
+    "Dependencies are declared in `pyproject.toml` and their exact versions are kept in `poetry.lock`."
+  ],
+  [
+    "No uses `pip install` en este proyecto: el paquete no quedaría registrado.",
+    "Do not use `pip install` in this project: the package would not be recorded."
+  ],
+  ["| Añadir una librería |", "| Add a library |"],
+  ["| Añadir una herramienta de desarrollo |", "| Add a development tool |"],
+  ["| Quitar una librería |", "| Remove a library |"],
+  ["| Actualizar versiones (dentro de los rangos) |", "| Update versions (within the ranges) |"],
+  ["| Ver el árbol de dependencias |", "| Show the dependency tree |"],
+  ["| Ejecutar cualquier comando en el entorno |", "| Run any command in the environment |"],
+  ["| Ver dónde está el entorno virtual |", "| Show where the virtual environment is |"],
+  ["| Validar pyproject.toml y poetry.lock |", "| Validate pyproject.toml and poetry.lock |"],
+  ["<paquete>", "<package>"],
+  ["<comando>", "<command>"],
+  [
+    "- El entorno virtual vive en `./.venv` (ver `poetry.toml`), así el editor lo detecta solo.",
+    "- The virtual environment lives in `./.venv` (see `poetry.toml`), so the editor detects it automatically."
+  ],
+  [
+    "- Ruff, mypy y pre-commit están en el grupo `dev`, separados de lo que necesitan los tests.",
+    "- Ruff, mypy and pre-commit are in the `dev` group, separate from what the tests need."
   ]
 ];
 
@@ -1231,6 +1296,10 @@ var DEFAULTS = {
     claude: true
   }
 };
+var PY_PACKAGE_MANAGER_OPTIONS = [
+  { value: "pip", label: "pip + requirements.txt", hint: "entorno virtual manual" },
+  { value: "poetry", label: "Poetry", hint: "pyproject.toml + poetry.lock" }
+];
 var MOBILE_BROWSERS = [
   { value: "mobile-chrome", label: "Móvil Android (Pixel 7)" },
   { value: "mobile-safari", label: "Móvil iOS (iPhone 15)" }
@@ -1282,12 +1351,17 @@ var DB_URLS = {
 };
 
 // src/answers/normalize.ts
+function pickPackageManager(lang, asked) {
+  if (lang === "ts") return "npm";
+  return asked === "poetry" ? "poetry" : "pip";
+}
 function normalize(a) {
   const d = (a.size ? DEFAULTS[a.size] : void 0) ?? DEFAULTS.medium;
   const out = { ...d, ...a };
   out.language = a.language === "en" ? "en" : "es";
   out.size = a.size ?? "medium";
   out.lang = a.lang === "py" ? "py" : "ts";
+  out.packageManager = pickPackageManager(out.lang, a.packageManager);
   out.name = a.name ?? "qa-e2e-framework";
   out.baseUrl = a.baseUrl ?? "https://playwright.dev";
   if (out.lang === "py") {
@@ -1329,6 +1403,9 @@ async function askAnswers() {
   );
   const lang = await askSelect("Lenguaje del framework", LANG_OPTIONS, "ts");
   a.lang = lang;
+  if (lang === "py") {
+    a.packageManager = await askSelect("Gestor de dependencias", PY_PACKAGE_MANAGER_OPTIONS, "pip");
+  }
   a.size = await askSelect("Tamaño / escala del proyecto (define valores sugeridos)", SIZES, "medium");
   const d = DEFAULTS[a.size];
   section("2. Aplicación y ejecución ──────────────────────────────");
@@ -1404,6 +1481,12 @@ function parseArgs(argv) {
 import path from "node:path";
 import process3 from "node:process";
 
+// src/version.ts
+var PW_VERSION = "1.62.1";
+var POETRY_VERSION = "2.5.1";
+var POETRY_MIN_VERSION = "2.2";
+var GENERATOR_VERSION = "1.2.0";
+
 // src/templates/helpers.ts
 var lines = (...xs) => xs.flat(Infinity).filter((x) => x !== false && x !== null && x !== void 0).join("\n");
 var has = (a, list, v) => a[list].includes(v);
@@ -1414,6 +1497,15 @@ var installBrowsers = (a) => [
   )
 ];
 var bddTool = (a) => a.lang === "ts" ? "Cucumber" : "Behave";
+var PACKAGE_MANAGER_LABELS = { npm: "npm", pip: "pip", poetry: "Poetry" };
+var packageManagerLabel = (a) => PACKAGE_MANAGER_LABELS[a.packageManager];
+var usesPoetry = (a) => a.packageManager === "poetry";
+var pyRun = (a, command) => usesPoetry(a) ? `poetry run ${command}` : command;
+var pyInstallCommands = (a) => usesPoetry(a) ? [`pip install poetry==${POETRY_VERSION}`, "poetry install --no-interaction"] : ["pip install -r requirements.txt"];
+var pyQualityCommands = (a) => [
+  ...usesPoetry(a) ? ["poetry check"] : [],
+  ...["ruff check .", "ruff format --check .", "mypy ."].map((command) => pyRun(a, command))
+];
 var hasBackend = (a) => a.api || a.db !== "none";
 
 // src/cli/summary.ts
@@ -1422,6 +1514,7 @@ function printSummary(a) {
   const yn = (b) => b ? a.language === "en" ? "yes" : "sí" : "no";
   log(c.magenta("\n── Resumen ────────────────────────────────────────────────"));
   row("Proyecto", `${a.name} (${a.lang === "ts" ? "TypeScript" : "Python"}, ${a.size})`);
+  row("Dependencias", packageManagerLabel(a));
   row("URL base / ambientes", `${a.baseUrl}  [${a.envs.join(", ")}]`);
   row("Navegadores", a.browsers.join(", "));
   row("Reportes", a.reporters.join(", ") || "list");
@@ -1439,15 +1532,18 @@ function printNextSteps(a, outDir, installed) {
   log(`  cd ${rel}`);
   if (!installed) {
     if (a.lang === "ts") log(`  npm install && npx playwright install ${browsers}`);
+    else if (usesPoetry(a)) log(`  poetry install && poetry run python -m playwright install ${browsers}`);
     else {
       log(
         `  python -m venv .venv && source .venv/bin/activate
   pip install -r requirements.txt && python -m playwright install ${browsers}`
       );
     }
-  } else if (a.lang === "py") log("  source .venv/bin/activate   (Windows: .venv\\Scripts\\activate)");
+  } else if (a.lang === "py" && !usesPoetry(a)) {
+    log("  source .venv/bin/activate   (Windows: .venv\\Scripts\\activate)");
+  }
   log("  cp .env.example .env");
-  log(a.lang === "ts" ? "  npm test" : "  pytest");
+  log(a.lang === "ts" ? "  npm test" : `  ${pyRun(a, "pytest")}`);
   log(c.dim("\n  Lee README.md para la arquitectura, comandos y próximos pasos.\n"));
 }
 function help() {
@@ -1465,6 +1561,7 @@ ${c.bold("create-pw-framework")} — genera un framework Playwright listo para t
 function azurePipeline(a) {
   const ts = a.lang === "ts";
   const n = a.shards;
+  const pytest = pyRun(a, "pytest -n auto --reruns 2");
   const secretEnv = lines(
     a.api && "          API_TOKEN: $(API_TOKEN)",
     a.auth && "          TEST_USER_PASSWORD: $(TEST_USER_PASSWORD)",
@@ -1508,20 +1605,20 @@ function azurePipeline(a) {
       "      - task: UsePythonVersion@0",
       "        inputs:",
       "          versionSpec: '3.12'",
-      "      - script: pip install -r requirements.txt",
+      `      - script: ${pyInstallCommands(a).join(" && ")}`,
       "        displayName: Instalar dependencias",
-      `      - script: python -m playwright install --with-deps ${installBrowsers(a).join(" ")}`,
+      `      - script: ${pyRun(a, "python -m playwright install")} --with-deps ${installBrowsers(a).join(" ")}`,
       "        displayName: Instalar navegadores",
       a.lint && [
-        "      - script: ruff check . && ruff format --check . && mypy .",
+        `      - script: ${pyQualityCommands(a).join(" && ")}`,
         "        displayName: Lint y tipos"
       ]
     ],
-    ts ? n > 1 ? "      - script: npx playwright test --shard=$(System.JobPositionInPhase)/$(System.TotalJobsInPhase)" : "      - script: npx playwright test" : n > 1 ? "      - script: pytest -n auto --reruns 2 --splits $(System.TotalJobsInPhase) --group $(System.JobPositionInPhase)" : "      - script: pytest -n auto --reruns 2",
+    ts ? n > 1 ? "      - script: npx playwright test --shard=$(System.JobPositionInPhase)/$(System.TotalJobsInPhase)" : "      - script: npx playwright test" : n > 1 ? `      - script: ${pytest} --splits $(System.TotalJobsInPhase) --group $(System.JobPositionInPhase)` : `      - script: ${pytest}`,
     "        displayName: Ejecutar pruebas",
     secretEnv && ["        env:", secretEnv],
     a.bdd && [
-      ts ? "      - script: npm run test:bdd" : "      - script: python -m behave",
+      ts ? "      - script: npm run test:bdd" : `      - script: ${pyRun(a, "python -m behave")}`,
       `        displayName: Ejecutar BDD (${bddTool(a)})`,
       n > 1 && "        condition: and(succeeded(), eq(variables['System.JobPositionInPhase'], 1))",
       secretEnv && ["        env:", secretEnv]
@@ -1542,10 +1639,6 @@ function azurePipeline(a) {
   );
 }
 
-// src/version.ts
-var PW_VERSION = "1.62.1";
-var GENERATOR_VERSION = "1.1.0";
-
 // src/templates/ci/docker.ts
 function dockerfile(a) {
   if (a.lang === "ts") {
@@ -1562,12 +1655,29 @@ function dockerfile(a) {
       ""
     );
   }
+  const browsers = installBrowsers(a).join(" ");
+  if (usesPoetry(a)) {
+    return lines(
+      "FROM python:3.12-slim",
+      "WORKDIR /e2e",
+      "ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 CI=true",
+      '# El entorno virtual queda en /e2e/.venv y va primero en el PATH: pytest se ejecuta sin "poetry run"',
+      'ENV POETRY_VIRTUALENVS_IN_PROJECT=true PATH="/e2e/.venv/bin:$PATH"',
+      "# Las dependencias se instalan antes de copiar el código: la capa se reutiliza entre builds",
+      "COPY pyproject.toml poetry.lock* ./",
+      `RUN pip install --no-cache-dir poetry==${POETRY_VERSION} && poetry install --no-interaction --no-ansi`,
+      `RUN python -m playwright install --with-deps ${browsers}`,
+      "COPY . .",
+      'CMD ["pytest", "-n", "auto"]',
+      ""
+    );
+  }
   return lines(
     "FROM python:3.12-slim",
     "WORKDIR /e2e",
     "ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 CI=true",
     "COPY requirements.txt .",
-    `RUN pip install --no-cache-dir -r requirements.txt && python -m playwright install --with-deps ${installBrowsers(a).join(" ")}`,
+    `RUN pip install --no-cache-dir -r requirements.txt && python -m playwright install --with-deps ${browsers}`,
     "COPY . .",
     'CMD ["pytest", "-n", "auto"]',
     ""
@@ -1585,6 +1695,11 @@ var envSecretsGh = (a) => lines(
   ],
   a.db !== "none" && "      DB_URL: ${{ secrets.DB_URL }}"
 );
+var pySetupSteps = (a) => [
+  "      - uses: actions/setup-python@v5",
+  "        with: { python-version: '3.12', cache: pip }",
+  ...pyInstallCommands(a).map((command) => `      - run: ${command}`)
+];
 var bddJobTs = (a) => a.bdd && [
   "",
   "  bdd:",
@@ -1617,17 +1732,16 @@ var bddJobPy = (a) => a.bdd && [
   envSecretsGh(a),
   "    steps:",
   "      - uses: actions/checkout@v4",
-  "      - uses: actions/setup-python@v5",
-  "        with: { python-version: '3.12', cache: pip }",
-  "      - run: pip install -r requirements.txt",
-  `      - run: python -m playwright install --with-deps ${installBrowsers(a)[0]}`,
-  "      - run: python -m behave",
+  pySetupSteps(a),
+  `      - run: ${pyRun(a, "python -m playwright install")} --with-deps ${installBrowsers(a)[0]}`,
+  `      - run: ${pyRun(a, "python -m behave")}`,
   "      - uses: actions/upload-artifact@v4",
   "        if: ${{ !cancelled() }}",
   "        with: { name: bdd-results, path: reports/, retention-days: 14 }"
 ];
 function githubWorkflow(a) {
   const n = a.shards;
+  const pytest = pyRun(a, "pytest -n auto --reruns 2");
   const shardMatrix = n > 1 ? [
     "    strategy:",
     "      fail-fast: false",
@@ -1720,12 +1834,8 @@ function githubWorkflow(a) {
       "    runs-on: ubuntu-latest",
       "    steps:",
       "      - uses: actions/checkout@v4",
-      "      - uses: actions/setup-python@v5",
-      "        with: { python-version: '3.12', cache: pip }",
-      "      - run: pip install -r requirements.txt",
-      "      - run: ruff check .",
-      "      - run: ruff format --check .",
-      "      - run: mypy .",
+      pySetupSteps(a),
+      pyQualityCommands(a).map((command) => `      - run: ${command}`),
       ""
     ],
     "  test:",
@@ -1743,11 +1853,9 @@ function githubWorkflow(a) {
     envSecretsGh(a),
     "    steps:",
     "      - uses: actions/checkout@v4",
-    "      - uses: actions/setup-python@v5",
-    "        with: { python-version: '3.12', cache: pip }",
-    "      - run: pip install -r requirements.txt",
-    `      - run: python -m playwright install --with-deps ${installBrowsers(a).join(" ")}`,
-    n > 1 ? `      - run: pytest -n auto --reruns 2 --splits ${n} --group \${{ matrix.group }}` : "      - run: pytest -n auto --reruns 2",
+    pySetupSteps(a),
+    `      - run: ${pyRun(a, "python -m playwright install")} --with-deps ${installBrowsers(a).join(" ")}`,
+    n > 1 ? `      - run: ${pytest} --splits ${n} --group \${{ matrix.group }}` : `      - run: ${pytest}`,
     "      - uses: actions/upload-artifact@v4",
     "        if: ${{ !cancelled() }}",
     "        with:",
@@ -1766,6 +1874,8 @@ function githubWorkflow(a) {
 function gitlabCi(a) {
   const ts = a.lang === "ts";
   const n = a.shards;
+  const pytest = pyRun(a, "pytest -n auto --reruns 2");
+  const pyLockFile = usesPoetry(a) ? "poetry.lock" : "requirements.txt";
   return lines(
     ts ? `image: mcr.microsoft.com/playwright:v${PW_VERSION}-noble` : "image: python:3.12",
     "",
@@ -1779,25 +1889,20 @@ function gitlabCi(a) {
     "",
     "cache:",
     "  key:",
-    `    files: [${ts ? "package-lock.json" : "requirements.txt"}]`,
+    `    files: [${ts ? "package-lock.json" : pyLockFile}]`,
     `  paths: [${ts ? ".npm/" : ".pip/"}]`,
     "",
     ts ? [".install: &install", "  - npm ci"] : [
       ".install: &install",
-      "  - pip install -r requirements.txt",
-      `  - python -m playwright install --with-deps ${installBrowsers(a).join(" ")}`
+      pyInstallCommands(a).map((command) => `  - ${command}`),
+      `  - ${pyRun(a, "python -m playwright install")} --with-deps ${installBrowsers(a).join(" ")}`
     ],
     "",
     a.lint && [
       "lint:",
       "  stage: quality",
       "  script:",
-      ts ? ["    - npm ci", "    - npm run lint", "    - npm run typecheck"] : [
-        "    - pip install -r requirements.txt",
-        "    - ruff check .",
-        "    - ruff format --check .",
-        "    - mypy ."
-      ],
+      ts ? ["    - npm ci", "    - npm run lint", "    - npm run typecheck"] : [...pyInstallCommands(a), ...pyQualityCommands(a)].map((command) => `    - ${command}`),
       ""
     ],
     "e2e:",
@@ -1805,7 +1910,7 @@ function gitlabCi(a) {
     n > 1 && `  parallel: ${n}`,
     "  script:",
     "    - *install",
-    ts ? n > 1 ? "    - npx playwright test --shard=$CI_NODE_INDEX/$CI_NODE_TOTAL" : "    - npx playwright test" : n > 1 ? "    - pytest -n auto --reruns 2 --splits $CI_NODE_TOTAL --group $CI_NODE_INDEX" : "    - pytest -n auto --reruns 2",
+    ts ? n > 1 ? "    - npx playwright test --shard=$CI_NODE_INDEX/$CI_NODE_TOTAL" : "    - npx playwright test" : n > 1 ? `    - ${pytest} --splits $CI_NODE_TOTAL --group $CI_NODE_INDEX` : `    - ${pytest}`,
     "  artifacts:",
     "    when: always",
     "    expire_in: 2 weeks",
@@ -1822,7 +1927,7 @@ function gitlabCi(a) {
       "  stage: test",
       "  script:",
       "    - *install",
-      ts ? "    - npm run test:bdd" : "    - python -m behave",
+      ts ? "    - npm run test:bdd" : `    - ${pyRun(a, "python -m behave")}`,
       "  artifacts:",
       "    when: always",
       "    expire_in: 2 weeks",
@@ -1838,7 +1943,11 @@ function gitlabCi(a) {
 // src/templates/ci/jenkins.ts
 function jenkinsfile(a) {
   const ts = a.lang === "ts";
-  const testCmd = ts ? `sh 'npx playwright test \${GREP:+--grep "$GREP"}'` : `sh '. .venv/bin/activate && pytest -n auto --reruns 2 \${GREP:+-m "$GREP"}'`;
+  const poetry = usesPoetry(a);
+  const pySh = (command) => poetry ? `sh 'poetry run ${command}'` : `sh '. .venv/bin/activate && ${command}'`;
+  const pyInstall = poetry ? pyInstallCommands(a).join(" && ") : "python -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt";
+  const pyLint = poetry ? `sh '${pyQualityCommands(a).join(" && ")}'` : pySh("ruff check . && ruff format --check . && mypy .");
+  const testCmd = ts ? `sh 'npx playwright test \${GREP:+--grep "$GREP"}'` : pySh('pytest -n auto --reruns 2 ${GREP:+-m "$GREP"}');
   return lines(
     "// Requiere plugins: Docker Pipeline, JUnit" + (has(a, "reporters", "allure") ? ", Allure Jenkins" : ""),
     "pipeline {",
@@ -1866,15 +1975,15 @@ function jenkinsfile(a) {
     "    stage('Install') {",
     "      steps {",
     ts ? "        sh 'npm ci'" : [
-      "        sh 'python -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt'",
-      `        sh '. .venv/bin/activate && python -m playwright install --with-deps ${installBrowsers(a).join(" ")}'`
+      `        sh '${pyInstall}'`,
+      `        ${pySh(`python -m playwright install --with-deps ${installBrowsers(a).join(" ")}`)}`
     ],
     "      }",
     "    }",
     a.lint && [
       "    stage('Lint') {",
       "      steps {",
-      ts ? "        sh 'npm run lint && npm run typecheck'" : "        sh '. .venv/bin/activate && ruff check . && ruff format --check . && mypy .'",
+      ts ? "        sh 'npm run lint && npm run typecheck'" : `        ${pyLint}`,
       "      }",
       "    }"
     ],
@@ -1886,7 +1995,7 @@ function jenkinsfile(a) {
     a.bdd && [
       "    stage('BDD') {",
       "      steps {",
-      ts ? "        sh 'npm run test:bdd'" : "        sh '. .venv/bin/activate && python -m behave'",
+      ts ? "        sh 'npm run test:bdd'" : `        ${pySh("python -m behave")}`,
       "      }",
       "    }"
     ],
@@ -1906,7 +2015,7 @@ function jenkinsfile(a) {
 // src/templates/claude/agents.ts
 function claudeAgents(a) {
   const ts = a.lang === "ts";
-  const runTools = ts ? "Bash(npx playwright test *), Bash(npx eslint *), Bash(npx tsc --noEmit*)" : "Bash(pytest *), Bash(ruff *), Bash(mypy *)";
+  const runTools = ts ? "Bash(npx playwright test *), Bash(npx eslint *), Bash(npx tsc --noEmit*)" : ["pytest *", "ruff *", "mypy *"].map((command) => `Bash(${pyRun(a, command)})`).join(", ");
   return {
     "qa-test-planner.md": lines(
       "---",
@@ -1990,11 +2099,12 @@ function claudeMd(a) {
       a.lint && "- Lint y tipos: `npm run lint && npm run typecheck`",
       "- Traza de un fallo: `npx playwright show-trace <trace.zip>`"
     ] : [
-      "- Ejecutar un test: `pytest <ruta> -x`",
-      "- Smoke: `pytest -m smoke`",
-      a.bdd && "- BDD (Behave): `python -m behave`",
-      a.lint && "- Lint y tipos: `ruff check . && ruff format --check . && mypy .`",
-      "- Traza de un fallo: `playwright show-trace <trace.zip>`"
+      `- Ejecutar un test: \`${pyRun(a, "pytest <ruta> -x")}\``,
+      `- Smoke: \`${pyRun(a, "pytest -m smoke")}\``,
+      a.bdd && `- BDD (Behave): \`${pyRun(a, "python -m behave")}\``,
+      a.lint && `- Lint y tipos: \`${pyQualityCommands(a).join(" && ")}\``,
+      `- Traza de un fallo: \`${pyRun(a, "playwright show-trace <trace.zip>")}\``,
+      usesPoetry(a) && "- Dependencias: `poetry add <paquete>` (o `--group dev`); no edites versiones a mano ni uses `pip install`."
     ],
     "",
     "## Arquitectura (obligatoria)",
@@ -2008,7 +2118,7 @@ function claudeMd(a) {
     "## Reglas de calidad",
     "- Prohibido `waitForTimeout`/`time.sleep`, `force: true`, `test.only`.",
     "- Web-first assertions siempre. Tests independientes con datos propios y teardown.",
-    ts ? "- Antes de terminar: ejecuta el test afectado con `--repeat-each=3` y el lint." : "- Antes de terminar: ejecuta el test afectado 3 veces (`pytest <ruta> --count=3` si tienes pytest-repeat) y el lint.",
+    ts ? "- Antes de terminar: ejecuta el test afectado con `--repeat-each=3` y el lint." : `- Antes de terminar: ejecuta el test afectado 3 veces (\`${pyRun(a, "pytest <ruta> --count=3")}\` si tienes pytest-repeat) y el lint.`,
     "",
     "## Seguridad y datos (NO negociable)",
     "- NUNCA leas, muestres ni copies archivos `.env*` (excepto `.env.example`) ni `.auth/`.",
@@ -2244,7 +2354,9 @@ function claudeSettings(a) {
           "Bash(npm run *)",
           "Bash(npx eslint *)",
           "Bash(npx tsc --noEmit*)"
-        ] : ["Bash(pytest *)", "Bash(ruff *)", "Bash(mypy *)", "Bash(playwright show-trace *)"],
+        ] : ["pytest *", "ruff *", "mypy *", "playwright show-trace *"].map(
+          (command) => `Bash(${pyRun(a, command)})`
+        ),
         "mcp__playwright__browser_navigate",
         "mcp__playwright__browser_snapshot"
       ],
@@ -2362,7 +2474,7 @@ function claudeSkills(a) {
       "",
       "Test a analizar: $ARGUMENTS",
       "",
-      ts ? "1. Reproduce: `npx playwright test $ARGUMENTS --repeat-each=10 --retries=0 --trace=on`." : "1. Reproduce: `pytest $ARGUMENTS -p no:randomly --tracing on` varias veces.",
+      ts ? "1. Reproduce: `npx playwright test $ARGUMENTS --repeat-each=10 --retries=0 --trace=on`." : `1. Reproduce: \`${pyRun(a, "pytest $ARGUMENTS -p no:randomly --tracing on")}\` varias veces.`,
       "2. Revisa la traza: red, consola y DOM en el paso que falla.",
       "3. Entrega una tabla: Causa | Evidencia | Acción propuesta.",
       "4. Bug de la app → no cambies el test; redacta el reporte. Test frágil → cambio mínimo.",
@@ -2634,6 +2746,9 @@ function readme(a, fileList) {
   const dbLabel = DB_OPTIONS.find((d) => d.value === a.db)?.label;
   const ciLabels = a.ci.map((x) => CI_OPTIONS.find((o) => o.value === x)?.label).join(", ") || "Ninguno";
   const tree = buildTree(fileList);
+  const poetry = usesPoetry(a);
+  const browsers = installBrowsers(a).join(" ");
+  const py = (command) => pyRun(a, command);
   return lines(
     `# ${a.name}`,
     "",
@@ -2645,6 +2760,7 @@ function readme(a, fileList) {
     "| Opción | Valor |",
     "|---|---|",
     `| Tamaño | ${SIZES.find((s) => s.value === a.size)?.label} |`,
+    `| Dependencias | ${packageManagerLabel(a)} |`,
     `| Navegadores | ${a.browsers.join(", ")} |`,
     `| Ambientes | ${a.envs.join(", ")} |`,
     `| Reportes | ${a.reporters.join(", ") || "list"} |`,
@@ -2662,6 +2778,7 @@ function readme(a, fileList) {
     "## Requisitos",
     "",
     ts ? "- Node.js 20 o superior" : "- Python 3.11 o superior",
+    poetry && `- Poetry ${POETRY_MIN_VERSION} o superior (https://python-poetry.org/docs/#installation)`,
     a.docker !== "none" && "- Docker (opcional, para ejecutar en contenedor)",
     has(a, "reporters", "allure") && "- Java 8+ para generar el reporte Allure localmente",
     "",
@@ -2673,16 +2790,26 @@ function readme(a, fileList) {
       `npx playwright install ${installBrowsers(a).join(" ")}`,
       "cp .env.example .env        # completa los valores (nunca subas .env)",
       "npm test"
+    ] : poetry ? [
+      "poetry install              # crea .venv e instala las dependencias",
+      `poetry run python -m playwright install ${browsers}`,
+      "cp .env.example .env        # completa los valores (nunca subas .env)",
+      "poetry run pytest"
     ] : [
       "python -m venv .venv",
       "source .venv/bin/activate   # Windows: .venv\\Scripts\\activate",
       "pip install -r requirements.txt",
-      `python -m playwright install ${installBrowsers(a).join(" ")}`,
+      `python -m playwright install ${browsers}`,
       "cp .env.example .env        # completa los valores (nunca subas .env)",
       "pytest"
     ],
     "```",
     "",
+    poetry && [
+      "La primera instalación crea `poetry.lock` con las versiones exactas: **súbelo al repositorio** para que",
+      "todo el equipo y el CI usen las mismas.",
+      ""
+    ],
     "## Comandos útiles",
     "",
     "| Acción | Comando |",
@@ -2705,25 +2832,46 @@ function readme(a, fileList) {
       ],
       a.lint && "| Lint / formato / tipos | `npm run lint` · `npm run format` · `npm run typecheck` |"
     ] : [
-      "| Toda la suite en paralelo | `pytest -n auto` |",
-      "| Solo smoke | `pytest -m smoke` |",
-      "| Con navegador visible | `pytest --headed --slowmo 300` |",
-      "| Depurar | `PWDEBUG=1 pytest <ruta> -s` |",
-      "| Reintentos (CI) | `pytest --reruns 2` |",
-      `| Otro ambiente | \`TEST_ENV=${a.envs[a.envs.length - 1]} pytest\` |`,
-      '| Emular móvil | `pytest --device "iPhone 15"` |',
+      `| Toda la suite en paralelo | \`${py("pytest -n auto")}\` |`,
+      `| Solo smoke | \`${py("pytest -m smoke")}\` |`,
+      `| Con navegador visible | \`${py("pytest --headed --slowmo 300")}\` |`,
+      `| Depurar | \`PWDEBUG=1 ${py("pytest <ruta> -s")}\` |`,
+      `| Reintentos (CI) | \`${py("pytest --reruns 2")}\` |`,
+      `| Otro ambiente | \`TEST_ENV=${a.envs[a.envs.length - 1]} ${py("pytest")}\` |`,
+      `| Emular móvil | \`${py('pytest --device "iPhone 15"')}\` |`,
       has(a, "reporters", "html") && "| Reporte HTML | `reports/report.html` |",
       has(a, "reporters", "allure") && "| Reporte Allure | `allure serve allure-results` |",
       a.bdd && [
-        "| BDD (Behave) | `python -m behave` |",
-        "| BDD solo smoke | `python -m behave --tags=@smoke` |",
-        "| BDD con navegador visible | `HEADED=1 python -m behave` |"
+        `| BDD (Behave) | \`${py("python -m behave")}\` |`,
+        `| BDD solo smoke | \`${py("python -m behave --tags=@smoke")}\` |`,
+        `| BDD con navegador visible | \`HEADED=1 ${py("python -m behave")}\` |`
       ],
-      a.lint && "| Lint / formato / tipos | `ruff check .` · `ruff format .` · `mypy .` |"
+      a.lint && `| Lint / formato / tipos | \`${py("ruff check .")}\` · \`${py("ruff format .")}\` · \`${py("mypy .")}\` |`
     ],
     has(a, "reporters", "metrics") && "| Métricas de la corrida | `reports/metrics.json` |",
     a.docker !== "none" && (a.docker === "compose" ? "| En contenedores | `docker compose up --build --exit-code-from tests` |" : `| En contenedor | \`docker build -t ${a.name} . && docker run --rm --ipc=host ${a.name}\` |`),
     "",
+    poetry && [
+      "## Dependencias (Poetry)",
+      "",
+      "Las dependencias se declaran en `pyproject.toml` y sus versiones exactas quedan en `poetry.lock`.",
+      "No uses `pip install` en este proyecto: el paquete no quedaría registrado.",
+      "",
+      "| Acción | Comando |",
+      "|---|---|",
+      "| Añadir una librería | `poetry add <paquete>` |",
+      "| Añadir una herramienta de desarrollo | `poetry add --group dev <paquete>` |",
+      "| Quitar una librería | `poetry remove <paquete>` |",
+      "| Actualizar versiones (dentro de los rangos) | `poetry update` |",
+      "| Ver el árbol de dependencias | `poetry show --tree` |",
+      "| Ejecutar cualquier comando en el entorno | `poetry run <comando>` |",
+      "| Ver dónde está el entorno virtual | `poetry env info` |",
+      a.lint && `| Validar pyproject.toml y poetry.lock | \`${pyQualityCommands(a)[0]}\` |`,
+      "",
+      "- El entorno virtual vive en `./.venv` (ver `poetry.toml`), así el editor lo detecta solo.",
+      a.lint && "- Ruff, mypy y pre-commit están en el grupo `dev`, separados de lo que necesitan los tests.",
+      ""
+    ],
     "## Arquitectura",
     "",
     "```text",
@@ -2975,7 +3123,7 @@ function pyDb(db) {
 // src/templates/py/bdd.ts
 function pyBehaveIni(a) {
   return lines(
-    "# Python no tiene Cucumber oficial: los .feature (Gherkin) se ejecutan con Behave → python -m behave",
+    `# Python no tiene Cucumber oficial: los .feature (Gherkin) se ejecutan con Behave → ${pyRun(a, "python -m behave")}`,
     "[behave]",
     "paths = features",
     "show_skipped = false",
@@ -3071,31 +3219,52 @@ function pyHomeSteps() {
   );
 }
 
-// src/templates/py/config.ts
+// src/templates/py/deps.ts
+var when = (condition, ...deps) => condition ? deps : [];
+function pyDependencies(a) {
+  return [
+    { spec: "playwright>=1.55" },
+    { spec: "pytest>=8.3" },
+    { spec: "pytest-playwright>=0.7" },
+    { spec: "pytest-xdist>=3.6", note: "paralelismo: pytest -n auto" },
+    { spec: "pytest-rerunfailures>=14", note: "reintentos en CI: --reruns 2" },
+    { spec: "python-dotenv>=1.0" },
+    ...when(a.shards > 1, { spec: "pytest-split>=0.10", note: "sharding en CI: --splits N --group i" }),
+    ...when(has(a, "reporters", "html"), { spec: "pytest-html>=4.1" }),
+    ...when(has(a, "reporters", "allure"), { spec: "allure-pytest>=2.13" }),
+    ...when(a.data, { spec: "Faker>=30.0" }, { spec: "factory-boy>=3.3" }),
+    ...when(a.db === "postgres", { spec: "psycopg[binary]>=3.2" }, { spec: "psycopg-pool>=3.2" }),
+    ...when(a.db === "mysql", { spec: "PyMySQL>=1.1" }),
+    ...when(a.db === "mssql", { spec: "pymssql>=2.3" }),
+    ...when(a.db === "mongodb", { spec: "pymongo>=4.8" }),
+    ...when(has(a, "extras", "a11y"), { spec: "axe-playwright-python>=0.1.4" }),
+    ...when(a.bdd, { spec: "behave>=1.2.6", note: `BDD: ${pyRun(a, "python -m behave")}` }),
+    ...when(a.lint, { spec: "ruff>=0.6", dev: true }, { spec: "mypy>=1.11", dev: true }),
+    ...when(a.precommit, { spec: "pre-commit>=3.8", dev: true })
+  ];
+}
 function pyRequirements(a) {
   return lines(
     "# Instalar: python -m pip install -r requirements.txt",
-    `playwright>=1.55`,
-    "pytest>=8.3",
-    "pytest-playwright>=0.7",
-    "pytest-xdist>=3.6        # paralelismo: pytest -n auto",
-    "pytest-rerunfailures>=14 # reintentos en CI: --reruns 2",
-    "python-dotenv>=1.0",
-    a.shards > 1 && "pytest-split>=0.10       # sharding en CI: --splits N --group i",
-    has(a, "reporters", "html") && "pytest-html>=4.1",
-    has(a, "reporters", "allure") && "allure-pytest>=2.13",
-    a.data && ["Faker>=30.0", "factory-boy>=3.3"],
-    a.db === "postgres" && ["psycopg[binary]>=3.2", "psycopg-pool>=3.2"],
-    a.db === "mysql" && "PyMySQL>=1.1",
-    a.db === "mssql" && "pymssql>=2.3",
-    a.db === "mongodb" && "pymongo>=4.8",
-    has(a, "extras", "a11y") && "axe-playwright-python>=0.1.4",
-    a.bdd && "behave>=1.2.6            # BDD: python -m behave",
-    a.lint && ["ruff>=0.6", "mypy>=1.11"],
-    a.precommit && "pre-commit>=3.8",
+    pyDependencies(a).map((d) => d.note ? `${d.spec.padEnd(24)} # ${d.note}` : d.spec),
     ""
   );
 }
+var tomlArray = (name, deps) => [
+  `${name} = [`,
+  ...deps.map((d) => `    "${d.spec}",${d.note ? `  # ${d.note}` : ""}`),
+  "]"
+];
+var pyProjectDependencies = (a) => tomlArray(
+  "dependencies",
+  pyDependencies(a).filter((d) => !d.dev)
+);
+function pyDevDependencyGroup(a) {
+  const dev = pyDependencies(a).filter((d) => d.dev);
+  return dev.length > 0 ? ["", "[dependency-groups]", ...tomlArray("dev", dev)] : [];
+}
+
+// src/templates/py/config.ts
 function pyProject(a) {
   const addopts = [
     ...installBrowsers(a).map((b) => `--browser=${b}`),
@@ -3111,7 +3280,20 @@ function pyProject(a) {
     `name = "${a.name}"`,
     'version = "0.1.0"',
     'description = "Framework de automatización E2E con Playwright + pytest"',
-    'requires-python = ">=3.11"',
+    // Poetry resuelve para todo el rango: sin límite superior choca con paquetes que declaran <4.0
+    usesPoetry(a) ? 'requires-python = ">=3.11,<4.0"' : 'requires-python = ">=3.11"',
+    usesPoetry(a) && [
+      pyProjectDependencies(a),
+      pyDevDependencyGroup(a),
+      "",
+      "[tool.poetry]",
+      "# Proyecto de pruebas, no una librería: Poetry solo gestiona dependencias",
+      "package-mode = false",
+      "",
+      "[build-system]",
+      'requires = ["poetry-core>=2.0"]',
+      'build-backend = "poetry.core.masonry.api"'
+    ],
     "",
     "[tool.pytest.ini_options]",
     'testpaths = ["tests"]',
@@ -3203,9 +3385,12 @@ function pyEnv(a) {
     ""
   );
 }
-function pyPrecommit() {
+function poetryToml() {
+  return lines("[virtualenvs]", "in-project = true", "");
+}
+function pyPrecommit(a) {
   return lines(
-    "# pre-commit install  →  se ejecuta en cada commit",
+    `# ${pyRun(a, "pre-commit install")}  →  se ejecuta en cada commit`,
     "repos:",
     "  - repo: https://github.com/astral-sh/ruff-pre-commit",
     "    rev: v0.6.9",
@@ -4486,7 +4671,8 @@ function tsFiles(f, a) {
   if (a.precommit) f.set(".husky/pre-commit", "npx lint-staged\n");
 }
 function pyFiles(f, a) {
-  f.set("requirements.txt", pyRequirements(a));
+  if (usesPoetry(a)) f.set("poetry.toml", poetryToml());
+  else f.set("requirements.txt", pyRequirements(a));
   f.set("pyproject.toml", pyProject(a));
   f.set("conftest.py", pyConftest(a));
   f.set("config/__init__.py", "");
@@ -4524,7 +4710,7 @@ function pyFiles(f, a) {
     f.set("features/environment.py", pyBehaveEnvironment());
     f.set("features/steps/home_steps.py", pyHomeSteps());
   }
-  if (a.precommit) f.set(".pre-commit-config.yaml", pyPrecommit());
+  if (a.precommit) f.set(".pre-commit-config.yaml", pyPrecommit(a));
 }
 function infraFiles(f, a) {
   if (a.docker !== "none") {
@@ -4591,6 +4777,9 @@ function run(cmd, args, cwd) {
   const r = spawnSync(cmd, args, { cwd, stdio: "inherit", shell: isWindows });
   return r.status === 0;
 }
+function hasCommand(cmd, cwd) {
+  return spawnSync(cmd, ["--version"], { cwd, stdio: "ignore", shell: isWindows }).status === 0;
+}
 function initGit(outDir) {
   if (fs2.existsSync(path2.join(outDir, ".git"))) return false;
   return spawnSync("git", ["init", "-q"], { cwd: outDir, shell: isWindows }).status === 0;
@@ -4600,12 +4789,26 @@ function install(a, outDir) {
     if (!run("npm", ["install"], outDir)) return false;
     return run("npx", ["playwright", "install", ...installBrowsers(a)], outDir);
   }
+  return usesPoetry(a) ? installWithPoetry(a, outDir) : installWithPip(a, outDir);
+}
+function installWithPip(a, outDir) {
   const sysPy = isWindows ? "python" : "python3";
   if (!run(sysPy, ["-m", "venv", ".venv"], outDir)) return false;
   const vpy = isWindows ? path2.join(".venv", "Scripts", "python.exe") : path2.join(".venv", "bin", "python");
   if (!run(vpy, ["-m", "pip", "install", "-q", "-r", "requirements.txt"], outDir)) return false;
   if (!run(vpy, ["-m", "playwright", "install", ...installBrowsers(a)], outDir)) return false;
   if (a.precommit && a.git) run(vpy, ["-m", "pre_commit", "install"], outDir);
+  return true;
+}
+function installWithPoetry(a, outDir) {
+  if (!hasCommand("poetry", outDir)) {
+    log(c.yellow("  Poetry no está instalado: https://python-poetry.org/docs/#installation"));
+    return false;
+  }
+  if (!run("poetry", ["install", "--no-interaction"], outDir)) return false;
+  const poetryRun = (...args) => run("poetry", ["run", ...args], outDir);
+  if (!poetryRun("python", "-m", "playwright", "install", ...installBrowsers(a))) return false;
+  if (a.precommit && a.git) poetryRun("pre-commit", "install");
   return true;
 }
 

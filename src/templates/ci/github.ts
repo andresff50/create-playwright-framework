@@ -1,5 +1,5 @@
 import type { Answers } from '../../answers/types.ts';
-import { lines, has, installBrowsers } from '../helpers.ts';
+import { lines, has, installBrowsers, pyInstallCommands, pyQualityCommands, pyRun } from '../helpers.ts';
 import { PW_VERSION } from '../../version.ts';
 
 export const envSecretsGh = (a: Answers): string =>
@@ -13,6 +13,13 @@ export const envSecretsGh = (a: Answers): string =>
     ],
     a.db !== 'none' && '      DB_URL: ${{ secrets.DB_URL }}',
   );
+
+/** Pasos que preparan Python e instalan las dependencias (pip o Poetry). */
+const pySetupSteps = (a: Answers): string[] => [
+  '      - uses: actions/setup-python@v5',
+  "        with: { python-version: '3.12', cache: pip }",
+  ...pyInstallCommands(a).map((command) => `      - run: ${command}`),
+];
 
 const bddJobTs = (a: Answers) =>
   a.bdd && [
@@ -49,11 +56,9 @@ const bddJobPy = (a: Answers) =>
     envSecretsGh(a),
     '    steps:',
     '      - uses: actions/checkout@v4',
-    '      - uses: actions/setup-python@v5',
-    "        with: { python-version: '3.12', cache: pip }",
-    '      - run: pip install -r requirements.txt',
-    `      - run: python -m playwright install --with-deps ${installBrowsers(a)[0]}`,
-    '      - run: python -m behave',
+    pySetupSteps(a),
+    `      - run: ${pyRun(a, 'python -m playwright install')} --with-deps ${installBrowsers(a)[0]}`,
+    `      - run: ${pyRun(a, 'python -m behave')}`,
     '      - uses: actions/upload-artifact@v4',
     '        if: ${{ !cancelled() }}',
     '        with: { name: bdd-results, path: reports/, retention-days: 14 }',
@@ -61,6 +66,7 @@ const bddJobPy = (a: Answers) =>
 
 export function githubWorkflow(a: Answers): string {
   const n = a.shards;
+  const pytest = pyRun(a, 'pytest -n auto --reruns 2');
   const shardMatrix =
     n > 1
       ? [
@@ -158,12 +164,8 @@ export function githubWorkflow(a: Answers): string {
       '    runs-on: ubuntu-latest',
       '    steps:',
       '      - uses: actions/checkout@v4',
-      '      - uses: actions/setup-python@v5',
-      "        with: { python-version: '3.12', cache: pip }",
-      '      - run: pip install -r requirements.txt',
-      '      - run: ruff check .',
-      '      - run: ruff format --check .',
-      '      - run: mypy .',
+      pySetupSteps(a),
+      pyQualityCommands(a).map((command) => `      - run: ${command}`),
       '',
     ],
     '  test:',
@@ -181,13 +183,9 @@ export function githubWorkflow(a: Answers): string {
     envSecretsGh(a),
     '    steps:',
     '      - uses: actions/checkout@v4',
-    '      - uses: actions/setup-python@v5',
-    "        with: { python-version: '3.12', cache: pip }",
-    '      - run: pip install -r requirements.txt',
-    `      - run: python -m playwright install --with-deps ${installBrowsers(a).join(' ')}`,
-    n > 1
-      ? `      - run: pytest -n auto --reruns 2 --splits ${n} --group \${{ matrix.group }}`
-      : '      - run: pytest -n auto --reruns 2',
+    pySetupSteps(a),
+    `      - run: ${pyRun(a, 'python -m playwright install')} --with-deps ${installBrowsers(a).join(' ')}`,
+    n > 1 ? `      - run: ${pytest} --splits ${n} --group \${{ matrix.group }}` : `      - run: ${pytest}`,
     '      - uses: actions/upload-artifact@v4',
     '        if: ${{ !cancelled() }}',
     '        with:',

@@ -8,6 +8,7 @@ import {
   DB_OPTIONS,
   DEFAULTS,
   DOCKER_OPTIONS,
+  PY_PACKAGE_MANAGER_OPTIONS,
   SIZES,
   browserOptions,
   extraOptions,
@@ -44,6 +45,9 @@ async function askAnswers(): Promise<RawAnswers> {
   );
   const lang = await askSelect('Lenguaje del framework', LANG_OPTIONS, 'ts');
   a.lang = lang;
+  if (lang === 'py') {
+    a.packageManager = await askSelect('Gestor de dependencias', PY_PACKAGE_MANAGER_OPTIONS, 'pip');
+  }
   a.size = await askSelect('Tamaño / escala del proyecto (define valores sugeridos)', SIZES, 'medium');
   const d = DEFAULTS[a.size];
 

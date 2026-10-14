@@ -1,11 +1,11 @@
 import type { Answers } from '../../answers/types.ts';
-import { lines } from '../helpers.ts';
+import { lines, pyRun } from '../helpers.ts';
 
 export function claudeAgents(a: Answers): Record<string, string> {
   const ts = a.lang === 'ts';
   const runTools = ts
     ? 'Bash(npx playwright test *), Bash(npx eslint *), Bash(npx tsc --noEmit*)'
-    : 'Bash(pytest *), Bash(ruff *), Bash(mypy *)';
+    : ['pytest *', 'ruff *', 'mypy *'].map((command) => `Bash(${pyRun(a, command)})`).join(', ');
   return {
     'qa-test-planner.md': lines(
       '---',

@@ -1,9 +1,10 @@
 import type { Answers } from '../../answers/types.ts';
-import { bddTool, lines, installBrowsers } from '../helpers.ts';
+import { bddTool, lines, installBrowsers, pyInstallCommands, pyQualityCommands, pyRun } from '../helpers.ts';
 
 export function azurePipeline(a: Answers): string {
   const ts = a.lang === 'ts';
   const n = a.shards;
+  const pytest = pyRun(a, 'pytest -n auto --reruns 2');
   const secretEnv = lines(
     a.api && '          API_TOKEN: $(API_TOKEN)',
     a.auth && '          TEST_USER_PASSWORD: $(TEST_USER_PASSWORD)',
@@ -49,12 +50,12 @@ export function azurePipeline(a: Answers): string {
           '      - task: UsePythonVersion@0',
           '        inputs:',
           "          versionSpec: '3.12'",
-          '      - script: pip install -r requirements.txt',
+          `      - script: ${pyInstallCommands(a).join(' && ')}`,
           '        displayName: Instalar dependencias',
-          `      - script: python -m playwright install --with-deps ${installBrowsers(a).join(' ')}`,
+          `      - script: ${pyRun(a, 'python -m playwright install')} --with-deps ${installBrowsers(a).join(' ')}`,
           '        displayName: Instalar navegadores',
           a.lint && [
-            '      - script: ruff check . && ruff format --check . && mypy .',
+            `      - script: ${pyQualityCommands(a).join(' && ')}`,
             '        displayName: Lint y tipos',
           ],
         ],
@@ -63,12 +64,12 @@ export function azurePipeline(a: Answers): string {
         ? '      - script: npx playwright test --shard=$(System.JobPositionInPhase)/$(System.TotalJobsInPhase)'
         : '      - script: npx playwright test'
       : n > 1
-        ? '      - script: pytest -n auto --reruns 2 --splits $(System.TotalJobsInPhase) --group $(System.JobPositionInPhase)'
-        : '      - script: pytest -n auto --reruns 2',
+        ? `      - script: ${pytest} --splits $(System.TotalJobsInPhase) --group $(System.JobPositionInPhase)`
+        : `      - script: ${pytest}`,
     '        displayName: Ejecutar pruebas',
     secretEnv && ['        env:', secretEnv],
     a.bdd && [
-      ts ? '      - script: npm run test:bdd' : '      - script: python -m behave',
+      ts ? '      - script: npm run test:bdd' : `      - script: ${pyRun(a, 'python -m behave')}`,
       `        displayName: Ejecutar BDD (${bddTool(a)})`,
       n > 1 && "        condition: and(succeeded(), eq(variables['System.JobPositionInPhase'], 1))",
       secretEnv && ['        env:', secretEnv],

@@ -1,11 +1,12 @@
 
-  ▶ create-pw-framework  v1.1.0 · Playwright 1.62.1
+  ▶ create-pw-framework  v1.2.0 · Playwright 1.62.1
 
   Responde las preguntas; Enter acepta el valor sugerido.
 
 
 ── Resumen ────────────────────────────────────────────────
   Proyecto               mi-framework-py (Python, large)
+  Dependencias           pip
   URL base / ambientes   https://playwright.dev  [dev, qa, staging]
   Navegadores            chromium, firefox
   Reportes               html, junit, allure, metrics

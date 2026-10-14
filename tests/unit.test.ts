@@ -2,11 +2,16 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
+import { parse as parseToml } from 'smol-toml';
 import { DEFAULTS } from '../src/answers/catalog.ts';
 import { normalize } from '../src/answers/normalize.ts';
+import type { RawAnswers } from '../src/answers/types.ts';
+import { buildProject } from '../src/project/build.ts';
 import { parseArgs } from '../src/cli/args.ts';
 import { buildTree } from '../src/templates/docs/tree.ts';
-import { has, installBrowsers, lines } from '../src/templates/helpers.ts';
+import { has, installBrowsers, lines, pyRun } from '../src/templates/helpers.ts';
+import { pyProject } from '../src/templates/py/config.ts';
+import { pyRequirements } from '../src/templates/py/deps.ts';
 import { GENERATOR_VERSION } from '../src/version.ts';
 import { ROOT } from './helpers/matrix.ts';
 
@@ -48,6 +53,41 @@ test('normalize no modifica los valores por defecto', () => {
   const before = structuredClone(DEFAULTS);
   normalize({ size: 'large', lang: 'py', ci: ['azure'] });
   assert.deepEqual(DEFAULTS, before);
+});
+
+test('normalize: npm en TypeScript; en Python pip salvo que se pida Poetry', () => {
+  assert.equal(normalize({ lang: 'ts', packageManager: 'poetry' }).packageManager, 'npm');
+  assert.equal(normalize({ lang: 'py' }).packageManager, 'pip');
+  assert.equal(normalize({ lang: 'py', packageManager: 'npm' }).packageManager, 'pip');
+  assert.equal(normalize({ lang: 'py', packageManager: 'poetry' }).packageManager, 'poetry');
+});
+
+test('pyRun antepone `poetry run` solo con Poetry', () => {
+  assert.equal(pyRun(normalize({ lang: 'py' }), 'pytest -m smoke'), 'pytest -m smoke');
+  assert.equal(
+    pyRun(normalize({ lang: 'py', packageManager: 'poetry' }), 'pytest -m smoke'),
+    'poetry run pytest -m smoke',
+  );
+});
+
+test('pip y Poetry declaran los mismos paquetes', () => {
+  const raw: RawAnswers = { lang: 'py', size: 'large', bdd: true, ci: ['github', 'gitlab'], shards: 3 };
+  const fromRequirements = pyRequirements(normalize(raw))
+    .split('\n')
+    .filter((line) => line && !line.startsWith('#'))
+    .map((line) => line.split(' #')[0]?.trim());
+
+  const poetry = normalize({ ...raw, packageManager: 'poetry' });
+  const pyproject = parseToml(pyProject(poetry)) as {
+    project: { dependencies: string[] };
+    'dependency-groups': { dev: string[] };
+  };
+  const fromPyproject = [...pyproject.project.dependencies, ...pyproject['dependency-groups'].dev];
+
+  assert.deepEqual(fromPyproject, fromRequirements);
+  assert.deepEqual(pyproject['dependency-groups'].dev, ['ruff>=0.6', 'mypy>=1.11', 'pre-commit>=3.8']);
+  assert.equal(buildProject(poetry).has('requirements.txt'), false);
+  assert.equal(buildProject(poetry).has('poetry.toml'), true);
 });
 
 test('has e installBrowsers', () => {

@@ -1,10 +1,20 @@
 import type { Answers } from '../../answers/types.ts';
-import { lines, has, installBrowsers } from '../helpers.ts';
+import {
+  lines,
+  has,
+  installBrowsers,
+  pyInstallCommands,
+  pyQualityCommands,
+  pyRun,
+  usesPoetry,
+} from '../helpers.ts';
 import { PW_VERSION } from '../../version.ts';
 
 export function gitlabCi(a: Answers): string {
   const ts = a.lang === 'ts';
   const n = a.shards;
+  const pytest = pyRun(a, 'pytest -n auto --reruns 2');
+  const pyLockFile = usesPoetry(a) ? 'poetry.lock' : 'requirements.txt';
   return lines(
     ts ? `image: mcr.microsoft.com/playwright:v${PW_VERSION}-noble` : 'image: python:3.12',
     '',
@@ -18,15 +28,15 @@ export function gitlabCi(a: Answers): string {
     '',
     'cache:',
     '  key:',
-    `    files: [${ts ? 'package-lock.json' : 'requirements.txt'}]`,
+    `    files: [${ts ? 'package-lock.json' : pyLockFile}]`,
     `  paths: [${ts ? '.npm/' : '.pip/'}]`,
     '',
     ts
       ? ['.install: &install', '  - npm ci']
       : [
           '.install: &install',
-          '  - pip install -r requirements.txt',
-          `  - python -m playwright install --with-deps ${installBrowsers(a).join(' ')}`,
+          pyInstallCommands(a).map((command) => `  - ${command}`),
+          `  - ${pyRun(a, 'python -m playwright install')} --with-deps ${installBrowsers(a).join(' ')}`,
         ],
     '',
     a.lint && [
@@ -35,12 +45,7 @@ export function gitlabCi(a: Answers): string {
       '  script:',
       ts
         ? ['    - npm ci', '    - npm run lint', '    - npm run typecheck']
-        : [
-            '    - pip install -r requirements.txt',
-            '    - ruff check .',
-            '    - ruff format --check .',
-            '    - mypy .',
-          ],
+        : [...pyInstallCommands(a), ...pyQualityCommands(a)].map((command) => `    - ${command}`),
       '',
     ],
     'e2e:',
@@ -53,8 +58,8 @@ export function gitlabCi(a: Answers): string {
         ? '    - npx playwright test --shard=$CI_NODE_INDEX/$CI_NODE_TOTAL'
         : '    - npx playwright test'
       : n > 1
-        ? '    - pytest -n auto --reruns 2 --splits $CI_NODE_TOTAL --group $CI_NODE_INDEX'
-        : '    - pytest -n auto --reruns 2',
+        ? `    - ${pytest} --splits $CI_NODE_TOTAL --group $CI_NODE_INDEX`
+        : `    - ${pytest}`,
     '  artifacts:',
     '    when: always',
     '    expire_in: 2 weeks',
@@ -71,7 +76,7 @@ export function gitlabCi(a: Answers): string {
       '  stage: test',
       '  script:',
       '    - *install',
-      ts ? '    - npm run test:bdd' : '    - python -m behave',
+      ts ? '    - npm run test:bdd' : `    - ${pyRun(a, 'python -m behave')}`,
       '  artifacts:',
       '    when: always',
       '    expire_in: 2 weeks',

@@ -1,9 +1,9 @@
 import type { Answers } from '../../answers/types.ts';
-import { has, lines } from '../helpers.ts';
+import { has, lines, pyRun } from '../helpers.ts';
 
 export function pyBehaveIni(a: Answers): string {
   return lines(
-    '# Python no tiene Cucumber oficial: los .feature (Gherkin) se ejecutan con Behave → python -m behave',
+    `# Python no tiene Cucumber oficial: los .feature (Gherkin) se ejecutan con Behave → ${pyRun(a, 'python -m behave')}`,
     '[behave]',
     'paths = features',
     'show_skipped = false',

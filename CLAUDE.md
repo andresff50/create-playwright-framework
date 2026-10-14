@@ -18,7 +18,7 @@ sin dependencias (Node.js 18+), que es lo que usa quien genera un proyecto.
 | Ruta                    | Contenido                                                                                           |
 | ----------------------- | --------------------------------------------------------------------------------------------------- |
 | `cli.ts`                | Punto de entrada: `main()` y sus pasos.                                                             |
-| `version.ts`            | `PW_VERSION`, `GENERATOR_VERSION`.                                                                  |
+| `version.ts`            | `PW_VERSION`, `POETRY_VERSION`, `POETRY_MIN_VERSION`, `GENERATOR_VERSION`.                          |
 | `i18n/en.ts`            | Tabla de traducción es→en (`PAIRS`). FUENTE de las traducciones.                                    |
 | `i18n/index.ts`         | `translate(texto, idioma)` (pura) y `tr()` / `setLanguage()` para la terminal.                      |
 | `cli/`                  | `args.ts` (`parseArgs`), `console.ts` (`c`, `log`), `prompts.ts` (`ask*`), `summary.ts`.            |
@@ -26,10 +26,11 @@ sin dependencias (Node.js 18+), que es lo que usa quien genera un proyecto.
 | `answers/catalog.ts`    | `SIZES`, `DEFAULTS` (valores por tamaño), `*_OPTIONS`, `DB_URLS`.                                   |
 | `answers/normalize.ts`  | `normalize()`: completa y hace coherentes las respuestas. Función pura.                             |
 | `answers/collect.ts`    | `collectAnswers()`: desde `--answers`, `--yes` o preguntando.                                       |
-| `templates/helpers.ts`  | `lines`, `has`, `installBrowsers`, `hasBackend`.                                                    |
+| `templates/helpers.ts`  | `lines`, `has`, `installBrowsers`, `hasBackend`, `bddTool`, `usesPoetry`, `pyRun`, `py*Commands`.   |
 | `templates/**`          | Una función por archivo generado: `common.ts`, `ts/`, `py/`, `ci/`, `claude/`, `docs/`.             |
 | `templates/bdd.ts`      | `.feature` de ejemplo (Gherkin), común a los dos lenguajes.                                         |
 | `templates/*/bdd.ts`    | BDD: `ts/bdd.ts` → Cucumber (config, world, hooks, pasos); `py/bdd.ts` → Behave (ini, environment, pasos). |
+| `templates/py/deps.ts`  | `pyDependencies(a)`: lista ÚNICA de paquetes Python; de ella salen `requirements.txt` y `pyproject.toml`. |
 | `project/build.ts`      | `buildProject(a)`: arma el `Map` ruta→contenido; si el idioma es inglés traduce cada archivo.       |
 | `project/write.ts`      | `writeProject`.                                                                                     |
 | `project/install.ts`    | `install`, `initGit`.                                                                               |
@@ -56,6 +57,10 @@ sin dependencias (Node.js 18+), que es lo que usa quien genera un proyecto.
   `bddTool(a)` para nombrarlo. El texto de cada paso aparece en el `.feature` y en su definición: al cambiarlo o
   traducirlo deben seguir coincidiendo en los dos idiomas (línea completa del `.feature` + frase del paso en `en.ts`).
   Comprueba que la línea `Given(...)` más larga tiene el mismo formato de Prettier en español y en inglés.
+- Gestor de dependencias de Python (`packageManager`: `pip` o `poetry`; en TypeScript siempre `npm`): Poetry sustituye a
+  pip, no a pytest. Todo comando de Python que aparezca en una plantilla pasa por `pyRun(a, '...')` (antepone `poetry run`);
+  en CI usa `pyInstallCommands(a)` y `pyQualityCommands(a)`. Un paquete nuevo se añade en `pyDependencies` (nunca en dos
+  sitios). Con Poetry no se genera `requirements.txt` ni `poetry.lock` (lo crea `poetry install`).
 - Si cambias `PW_VERSION`, la imagen Docker de CI y `@playwright/test` se actualizan juntos.
 - Si un cambio modifica la salida A PROPÓSITO: `npm run test:update-golden` y revisa el diff de `tests/golden/`.
   Un refactor no debe cambiar esa carpeta.
@@ -67,7 +72,8 @@ sin dependencias (Node.js 18+), que es lo que usa quien genera un proyecto.
 ```bash
 npm run build     # regenera create-pw-framework.mjs
 npm run check     # tipos, ESLint, Prettier y tests (golden, salida EN sin español, JSON/YAML, bundle al día)
-# Prueba completa (requiere red): generar con ejemplos/*.json, npm install / pip install y correr lint, tipos y tests
+# Prueba completa (requiere red): generar con ejemplos/*.json, npm install / pip install / poetry install y correr
+# lint, tipos y tests. `node tests/helpers/golden-diff.ts` resume qué archivos cambian antes de actualizar el golden.
 ```
 
 Desarrollo: Node.js 22.18+ (`npm install`). El bundle generado sigue funcionando con Node.js 18+.

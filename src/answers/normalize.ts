@@ -1,5 +1,11 @@
 import { DEFAULTS } from './catalog.ts';
-import type { Answers, RawAnswers } from './types.ts';
+import type { Answers, Lang, PackageManager, RawAnswers } from './types.ts';
+
+/** TypeScript usa siempre npm; en Python se usa pip salvo que se pida Poetry. */
+function pickPackageManager(lang: Lang, asked: PackageManager | undefined): PackageManager {
+  if (lang === 'ts') return 'npm';
+  return asked === 'poetry' ? 'poetry' : 'pip';
+}
 
 /** Completa las respuestas con los valores del tamaño elegido y resuelve combinaciones incoherentes. */
 export function normalize(a: RawAnswers): Answers {
@@ -9,6 +15,7 @@ export function normalize(a: RawAnswers): Answers {
   out.language = a.language === 'en' ? 'en' : 'es';
   out.size = a.size ?? 'medium';
   out.lang = a.lang === 'py' ? 'py' : 'ts';
+  out.packageManager = pickPackageManager(out.lang, a.packageManager);
   out.name = a.name ?? 'qa-e2e-framework';
   out.baseUrl = a.baseUrl ?? 'https://playwright.dev';
   if (out.lang === 'py') {

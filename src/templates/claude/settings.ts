@@ -1,4 +1,5 @@
 import type { Answers } from '../../answers/types.ts';
+import { pyRun } from '../helpers.ts';
 
 export function claudeSettings(a: Answers): string {
   const ts = a.lang === 'ts';
@@ -40,7 +41,9 @@ export function claudeSettings(a: Answers): string {
               'Bash(npx eslint *)',
               'Bash(npx tsc --noEmit*)',
             ]
-          : ['Bash(pytest *)', 'Bash(ruff *)', 'Bash(mypy *)', 'Bash(playwright show-trace *)']),
+          : ['pytest *', 'ruff *', 'mypy *', 'playwright show-trace *'].map(
+              (command) => `Bash(${pyRun(a, command)})`,
+            )),
         'mcp__playwright__browser_navigate',
         'mcp__playwright__browser_snapshot',
       ],

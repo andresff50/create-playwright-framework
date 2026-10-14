@@ -136,6 +136,37 @@ function edgeVariants(): Variant[] {
   return out;
 }
 
+// Python con Poetry: proyecto completo, y uno sin lint (sin grupo dev) con CI de un solo job
+function poetryVariants(): Variant[] {
+  const out: Variant[] = [];
+  for (const language of LANGUAGES) {
+    out.push(
+      {
+        id: `poetry-full-${language}`,
+        raw: { name: 'chk-poetry', lang: 'py', packageManager: 'poetry', db: 'mysql', ...FULL, language },
+      },
+      {
+        id: `poetry-no-lint-${language}`,
+        raw: {
+          name: 'chk-poetry-no-lint',
+          lang: 'py',
+          packageManager: 'poetry',
+          size: 'medium',
+          bdd: true,
+          docker: 'dockerfile',
+          ci: ['github', 'jenkins', 'gitlab', 'azure'],
+          shards: 1,
+          lint: false,
+          claude: true,
+          git: false,
+          language,
+        },
+      },
+    );
+  }
+  return out;
+}
+
 function exampleVariants(): Variant[] {
   return fs
     .readdirSync(EXAMPLES_DIR)
@@ -159,6 +190,7 @@ export const VARIANTS: Variant[] = [
   ...fullVariants(),
   ...sizeVariants(),
   ...edgeVariants(),
+  ...poetryVariants(),
   ...exampleVariants(),
   ...yesVariants(),
 ];

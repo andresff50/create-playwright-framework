@@ -1,11 +1,12 @@
 
-  ▶ create-pw-framework  v1.1.0 · Playwright 1.62.1
+  ▶ create-pw-framework  v1.2.0 · Playwright 1.62.1
 
   Responde las preguntas; Enter acepta el valor sugerido.
 
 
 ── Summary ────────────────────────────────────────────────
   Project                my-framework-ts (TypeScript, large)
+  Dependencies           npm
   Base URL / envs        https://playwright.dev  [dev, qa, staging]
   Browsers               chromium, firefox, mobile-chrome
   Reports                html, junit, allure, metrics

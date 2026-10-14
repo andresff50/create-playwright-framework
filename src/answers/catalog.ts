@@ -7,6 +7,7 @@ import type {
   Extra,
   Lang,
   Option,
+  PackageManager,
   Reporter,
   Size,
   SizeDefaults,
@@ -71,6 +72,12 @@ export const DEFAULTS: Record<Size, SizeDefaults> = {
     claude: true,
   },
 };
+
+/** Gestores de dependencias que se pueden elegir en Python (TypeScript usa siempre npm). */
+export const PY_PACKAGE_MANAGER_OPTIONS: Option<Exclude<PackageManager, 'npm'>>[] = [
+  { value: 'pip', label: 'pip + requirements.txt', hint: 'entorno virtual manual' },
+  { value: 'poetry', label: 'Poetry', hint: 'pyproject.toml + poetry.lock' },
+];
 
 const MOBILE_BROWSERS: Option<Browser>[] = [
   { value: 'mobile-chrome', label: 'Móvil Android (Pixel 7)' },

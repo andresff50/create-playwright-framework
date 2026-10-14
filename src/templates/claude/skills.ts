@@ -1,5 +1,5 @@
 import type { Answers } from '../../answers/types.ts';
-import { lines } from '../helpers.ts';
+import { lines, pyRun } from '../helpers.ts';
 
 export function claudeSkills(a: Answers): Record<string, string> {
   const ts = a.lang === 'ts';
@@ -65,7 +65,7 @@ export function claudeSkills(a: Answers): Record<string, string> {
       '',
       ts
         ? '1. Reproduce: `npx playwright test $ARGUMENTS --repeat-each=10 --retries=0 --trace=on`.'
-        : '1. Reproduce: `pytest $ARGUMENTS -p no:randomly --tracing on` varias veces.',
+        : `1. Reproduce: \`${pyRun(a, 'pytest $ARGUMENTS -p no:randomly --tracing on')}\` varias veces.`,
       '2. Revisa la traza: red, consola y DOM en el paso que falla.',
       '3. Entrega una tabla: Causa | Evidencia | Acción propuesta.',
       '4. Bug de la app → no cambies el test; redacta el reporte. Test frágil → cambio mínimo.',

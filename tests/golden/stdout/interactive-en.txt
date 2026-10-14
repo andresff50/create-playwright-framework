@@ -1,5 +1,5 @@
 
-  ▶ create-pw-framework  v1.1.0 · Playwright 1.62.1
+  ▶ create-pw-framework  v1.2.0 · Playwright 1.62.1
 
 ? Idioma / Language  (preguntas, código y documentación / questions, code and docs)
   › 1) Español
@@ -79,6 +79,7 @@
 
 ── Summary ────────────────────────────────────────────────
   Project                demo-en (TypeScript, small)
+  Dependencies           npm
   Base URL / envs        https://playwright.dev  [qa]
   Browsers               chromium
   Reports                list

@@ -15,11 +15,12 @@ import { homeFeature } from '../templates/bdd.ts';
 import { composeFile, dockerignore, editorconfig, envExample, gitignore } from '../templates/common.ts';
 import { architectureDoc } from '../templates/docs/architecture.ts';
 import { readme } from '../templates/docs/readme.ts';
-import { has, lines } from '../templates/helpers.ts';
+import { has, lines, usesPoetry } from '../templates/helpers.ts';
 import { pyApiClient, pyDb, pyFactories } from '../templates/py/api-data-db.ts';
 import { pyBehaveEnvironment, pyBehaveIni, pyHomeSteps } from '../templates/py/bdd.ts';
-import { pyEnv, pyPrecommit, pyProject, pyRequirements } from '../templates/py/config.ts';
+import { poetryToml, pyEnv, pyPrecommit, pyProject } from '../templates/py/config.ts';
 import { pyConftest, pyHeader, pyHomePage, pyLoginPage } from '../templates/py/conftest-pages.ts';
+import { pyRequirements } from '../templates/py/deps.ts';
 import { pyMetricsPlugin } from '../templates/py/metrics-plugin.ts';
 import { pyTestA11y, pyTestApi, pyTestDb, pyTestHome } from '../templates/py/tests.ts';
 import { tsApiClient, tsDb, tsUserFactory } from '../templates/ts/api-data-db.ts';
@@ -102,7 +103,9 @@ function tsFiles(f: ProjectFiles, a: Answers): void {
 }
 
 function pyFiles(f: ProjectFiles, a: Answers): void {
-  f.set('requirements.txt', pyRequirements(a));
+  // Poetry declara las dependencias en pyproject.toml; pip, en requirements.txt
+  if (usesPoetry(a)) f.set('poetry.toml', poetryToml());
+  else f.set('requirements.txt', pyRequirements(a));
   f.set('pyproject.toml', pyProject(a));
   f.set('conftest.py', pyConftest(a));
   f.set('config/__init__.py', '');
@@ -140,7 +143,7 @@ function pyFiles(f: ProjectFiles, a: Answers): void {
     f.set('features/environment.py', pyBehaveEnvironment());
     f.set('features/steps/home_steps.py', pyHomeSteps());
   }
-  if (a.precommit) f.set('.pre-commit-config.yaml', pyPrecommit());
+  if (a.precommit) f.set('.pre-commit-config.yaml', pyPrecommit(a));
 }
 
 function infraFiles(f: ProjectFiles, a: Answers): void {
